@@ -43,6 +43,7 @@
 }
 
 :root {
+  --font-sans: "__Inter_36bd41", "__Inter_Fallback_36bd41", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -117,5 +118,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+  html {
+    font-family: var(--font-sans);
   }
 }

@@ -1,86 +1,64 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import { DotPattern } from "@/components/magicui/dot-pattern";
 import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-react';
+import { RippleButton } from "@/components/magicui/ripple-button";
 
 const App: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    // Check local storage or system preference for initial dark mode setting
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme === 'dark';
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    localStorage.setItem('theme', newMode ? 'dark' : 'light');
-    
-    // Apply to document for Tailwind to pick up
-    document.documentElement.classList.toggle('dark', newMode);
-  };
-
-  // Effect to set initial theme and listen for system preference changes
+  // Effect to set dark theme on mount
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    const handleThemeChange = (e: MediaQueryListEvent) => {
-      const newMode = e.matches;
-      setIsDarkMode(newMode);
-      localStorage.setItem('theme', newMode ? 'dark' : 'light');
-      document.documentElement.classList.toggle('dark', newMode);
-    };
-
-    // Initial setup
-    document.documentElement.classList.toggle('dark', isDarkMode);
-
-    // Listen for system theme changes
-    mediaQuery.addEventListener('change', handleThemeChange);
-
-    // Cleanup
-    return () => {
-      mediaQuery.removeEventListener('change', handleThemeChange);
-    };
+    // Force dark mode always
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-      {/* Navbar */}
-      <nav className="relative w-full py-4 px-6 border-b border-gray-200 dark:border-gray-700">
+    <div className="min-h-screen flex flex-col bg-black text-gray-100 transition-colors duration-300 relative font-sans">
+      {/* Background Dot Pattern - Positioned to cover the entire screen */}
+      <DotPattern
+        width={25}
+        height={25}
+        cx={2}
+        cy={2}
+        cr={2}
+        glow={true}
+        className={cn(
+          "absolute inset-0 w-full h-full z-0 text-blue-400/70",
+          "[mask-image:radial-gradient(ellipse_at_center,white_60%,transparent_95%)]",
+        )}
+      />
+      
+      {/* Navbar with blurred background */}
+      <nav className="relative z-10 w-full py-4 px-6 border-b border-gray-800/50 bg-gradient-to-r from-black/80 via-black/85 to-black/80 backdrop-blur-xl shadow-lg shadow-black/20">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           {/* App Name */}
-          <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">Clara</div>
+          <div className="text-2xl font-bold text-gray-200">Clara</div>
           
-          {/* Login/Signup and Theme Toggle Buttons */}
+          {/* Login/Signup Buttons */}
           <div className="flex space-x-4 items-center">
-            <Button variant="outline" className="mr-2">Login</Button>
-            <Button>Sign Up</Button>
-            <button 
-              onClick={toggleDarkMode} 
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Toggle dark mode"
+            <RippleButton 
+              rippleColor="#ADD8E6" 
+              className="py-2 px-4 mr-2 bg-transparent hover:bg-gray-800 text-gray-200 font-semibold border border-gray-700 rounded-lg"
             >
-              {isDarkMode ? (
-                <Sun className="h-6 w-6 text-yellow-500" />
-              ) : (
-                <Moon className="h-6 w-6 text-gray-800" />
-              )}
-            </button>
+              Login
+            </RippleButton>
+            <RippleButton 
+              rippleColor="#ADD8E6"
+              className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"
+            >
+              Sign Up
+            </RippleButton>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="relative flex-grow flex items-center justify-center">
-        <div className="relative z-10 text-center max-w-2xl mx-auto px-4">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+      <main className="relative z-10 flex-grow flex items-center justify-center">
+        <div className="text-center max-w-2xl mx-auto px-4">
+          <h1 className="text-4xl font-bold text-white mb-6">
             Meet Clara: Your Medical Companion
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+          <p className="text-xl text-gray-400 mb-8">
             Clara is an advanced AI-powered medical help bot designed to provide personalized health insights, 
             answer medical questions, and support your healthcare journey with accurate and compassionate information.
           </p>
@@ -89,21 +67,11 @@ const App: React.FC = () => {
             <Button variant="outline" size="lg">Learn More</Button>
           </div>
         </div>
-
-        {/* Background Dot Pattern */}
-        <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden">
-      <DotPattern
-        glow={true}
-        className={cn(
-          "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
-        )}
-      />
-      </div>
       </main>
 
-      {/* Footer */}
-      <footer className="relative py-6 px-6 text-center border-t border-gray-200 dark:border-gray-700">
-        <p className="text-gray-500 dark:text-gray-400">
+      {/* Footer with blurred background */}
+      <footer className="relative z-10 py-6 px-6 text-center border-t border-gray-800/50 bg-gradient-to-r from-black/80 via-black/85 to-black/80 backdrop-blur-xl">
+        <p className="text-gray-500">
           © 2025 Clara. All rights reserved.
         </p>
       </footer>
