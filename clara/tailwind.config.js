@@ -4,6 +4,9 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      backgroundSize: {
+        "300%": "300%",
+      },
       fontFamily: {
         sans: [
           "__Inter_36bd41", 
@@ -56,6 +59,31 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      animation: {
+        "pulse": "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "fade-in": "fadeIn 0.8s ease-out forwards",
+        "gradient-x": "gradient-x 8s ease infinite",
+        "shine": "shine 1.5s infinite",
+      },
+      keyframes: {
+        pulse: {
+          "0%, 100%": { opacity: 1 },
+          "50%": { opacity: 0.5 },
+        },
+        fadeIn: {
+          "from": { opacity: 0, transform: "translateY(-10px)" },
+          "to": { opacity: 1, transform: "translateY(0)" },
+        },
+        "gradient-x": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        "shine": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(200%)" },
+        },
       },
     },
   },

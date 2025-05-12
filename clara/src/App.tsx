@@ -1,8 +1,11 @@
 import React, { useEffect } from 'react';
 import { cn } from "@/lib/utils";
-import { DotPattern } from "@/components/magicui/dot-pattern";
 import { Button } from '@/components/ui/button';
 import { RippleButton } from "@/components/magicui/ripple-button";
+import { PulsatingButton } from "@/components/magicui/pulsating-button";
+import { ShinyButton } from "@/components/magicui/shiny-button";
+import { InteractiveGridPattern } from "@/components/magicui/interactive-grid-pattern";
+import { ArrowRight } from 'lucide-react';
 
 const App: React.FC = () => {
   // Effect to set dark theme on mount
@@ -14,57 +17,68 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-gray-100 transition-colors duration-300 relative font-sans">
-      {/* Background Dot Pattern - Positioned to cover the entire screen */}
-      <DotPattern
-        width={25}
-        height={25}
-        cx={2}
-        cy={2}
-        cr={2}
-        glow={true}
+      {/* Interactive Grid Pattern Background */}
+      <InteractiveGridPattern
         className={cn(
-          "absolute inset-0 w-full h-full z-0 text-blue-400/70",
+          "absolute inset-0 w-full h-full z-0",
           "[mask-image:radial-gradient(ellipse_at_center,white_60%,transparent_95%)]",
         )}
+        count={50}
+        pointColor="rgba(66, 153, 225, 0.6)" // blue-400 with opacity
+        lineColor="rgba(66, 153, 225, 0.3)" // blue-400 with less opacity
+        pointSize={2}
+        pointDuration={3000}
+        cursorEffect={200}
       />
       
-      {/* Navbar with blurred background */}
-      <nav className="relative z-10 w-full py-4 px-6 border-b border-gray-800/50 bg-gradient-to-r from-black/80 via-black/85 to-black/80 backdrop-blur-xl shadow-lg shadow-black/20">
+      {/* Navbar with blurred background - reduced height */}
+      <nav className="relative z-10 w-full py-2 px-4 border-b border-gray-800/50 bg-gradient-to-r from-black/80 via-black/85 to-black/80 backdrop-blur-xl shadow-lg shadow-black/20">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           {/* App Name */}
-          <div className="text-2xl font-bold text-gray-200">Clara</div>
+          <div className="text-xl font-bold text-gray-200">Clara</div>
           
           {/* Login/Signup Buttons */}
-          <div className="flex space-x-4 items-center">
+          <div className="flex space-x-2 items-center">
             <RippleButton 
               rippleColor="#ADD8E6" 
-              className="py-2 px-4 mr-2 bg-transparent hover:bg-gray-800 text-gray-200 font-semibold border border-gray-700 rounded-lg"
+              className="py-1 px-3 text-sm bg-transparent hover:bg-gray-800 text-gray-200 font-medium rounded-lg"
             >
-              Login
+              Log in
             </RippleButton>
             <RippleButton 
               rippleColor="#ADD8E6"
-              className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"
+              className="py-1.5 px-4 text-sm bg-white hover:bg-gray-100 text-black font-medium rounded-full"
             >
-              Sign Up
+              Sign up
             </RippleButton>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-grow flex items-center justify-center">
-        <div className="text-center max-w-2xl mx-auto px-4">
-          <h1 className="text-4xl font-bold text-white mb-6">
-            Meet Clara: Your Medical Companion
+      <main className="relative z-10 flex-grow flex flex-col items-center justify-center pt-10">
+        {/* Floating Badge with Shiny Effect */}
+        <ShinyButton className="mb-6 bg-gray-950 border border-gray-800/50 rounded-full px-4 py-1.5 text-gray-400 text-sm">
+          <span className="mr-2 text-amber-500">✨</span>
+          <span className="font-medium">Introducing Clara</span>
+          <ArrowRight className="ml-2 h-3 w-3 inline" />
+        </ShinyButton>
+        
+        <div className="text-center max-w-4xl mx-auto px-4">
+          <h1 className="tracking-tighter leading-tight mb-8">
+            <span className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold block mb-2 text-white">Clara</span>
+            <span className="text-4xl sm:text-5xl md:text-6xl font-medium block bg-gradient-to-r from-white via-blue-300 to-blue-500 text-transparent bg-clip-text animate-gradient-x bg-300%">your health buddy.</span>
           </h1>
-          <p className="text-xl text-gray-400 mb-8">
-            Clara is an advanced AI-powered medical help bot designed to provide personalized health insights, 
-            answer medical questions, and support your healthcare journey with accurate and compassionate information.
+          <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Beautifully designed, intelligent AI medical companion built with
+            <br className="hidden md:block" />
+            modern technology to provide personalized health insights.
           </p>
-          <div className="flex justify-center space-x-4">
-            <Button size="lg">Get Started</Button>
-            <Button variant="outline" size="lg">Learn More</Button>
+          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <PulsatingButton className="inline-flex items-center whitespace-nowrap">
+              <span>Get Started for free</span>
+              <ArrowRight className="ml-1.5 h-3 w-3 inline" />
+            </PulsatingButton>
           </div>
         </div>
       </main>
