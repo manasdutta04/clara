@@ -119,6 +119,4 @@ Clara is inspired by the vision of making healthcare more accessible, understand
 
 ## 📬 Developers
 
-[![Manas Dutta](https://avatars.githubusercontent.com/u/122201926?size=60)](https://github.com/manasdutta04 "Manas on GitHub")
-
-[![Paritosh Dey](https://avatars.githubusercontent.com/u/140790221?size=60)](https://github.com/paritoshdey-dev "Paritosh on GitHub")
+[![Manas Dutta](https://avatars.githubusercontent.com/u/122201926?size=50)](https://github.com/manasdutta04 "Manas on GitHub") [![Paritosh Dey](https://avatars.githubusercontent.com/u/140790221?size=50)](https://github.com/paritoshdey-dev "Paritosh on GitHub")
