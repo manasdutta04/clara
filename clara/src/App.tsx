@@ -13,7 +13,7 @@ import Footer from "@/components/footer";
 import { ArrowRight } from 'lucide-react';
 import AuthPage from '@/pages/auth/AuthPage';
 import '@/styles/globals.css';
-
+    
 // HomePage component (formerly the App content)
 const HomePage: React.FC = () => {
   const textRevealRef = useRef<HTMLDivElement>(null);
@@ -32,13 +32,13 @@ const HomePage: React.FC = () => {
       // Calculate when the section should start and end being sticky
       const startSticky = sectionTop - windowHeight;
       const endSticky = sectionTop + windowHeight;
-      
+
       // Set sticky state based on scroll position
       setIsSticky(scrollY >= startSticky && scrollY <= endSticky);
     };
     
     window.addEventListener('scroll', handleScroll);
-    
+
     // Initial call to set position correctly
     setTimeout(() => {
       handleScroll();
@@ -121,7 +121,7 @@ const HomePage: React.FC = () => {
             </Link>
           </div>
         </div>
-        
+
         {/* Magic UI Text Reveal Section */}
         <div className="w-full" ref={textRevealRef}>
           <div className="h-[50vh]"></div> {/* Increased spacer before animation starts */}
@@ -139,7 +139,7 @@ const HomePage: React.FC = () => {
           </TextReveal>
           
           <div className="h-[30vh]"></div> {/* Spacer after animation ends */}
-        </div>
+      </div>
 
         {/* Features Section */}
         <FeaturesSection />
