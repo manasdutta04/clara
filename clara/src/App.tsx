@@ -13,6 +13,11 @@ import Footer from "@/components/footer";
 import { ArrowRight } from 'lucide-react';
 import AuthPage from '@/pages/auth/AuthPage';
 import '@/styles/globals.css';
+import MultilingualSupport from './pages/MultilingualSupport';
+import MedicalHistory from './pages/MedicalHistory';
+import LabReportAnalysis from './pages/LabReportAnalysis';
+import AiDiagnosis from './pages/AiDiagnosis';
+import MentalHealthChatbot from './pages/MentalHealthChatbot';
     
 // HomePage component (formerly the App content)
 const HomePage: React.FC = () => {
@@ -167,6 +172,11 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/language" element={<MultilingualSupport />} />
+        <Route path="/medical-history" element={<MedicalHistory />} />
+        <Route path="/lab-report-analysis" element={<LabReportAnalysis />} />
+        <Route path="/ai-diagnosis" element={<AiDiagnosis />} />
+        <Route path="/mental-health-chatbot" element={<MentalHealthChatbot />} />
       </Routes>
     </Router>
   );
