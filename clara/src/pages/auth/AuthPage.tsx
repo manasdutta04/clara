@@ -3,6 +3,7 @@ import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { RippleButton } from '@/components/magicui/ripple-button';
 import { InteractiveGridPattern } from '@/components/magicui/interactive-grid-pattern';
 import { ShineBorder } from '@/components/magicui/shine-border';
+import Footer from '@/components/footer';
 import { cn } from '@/lib/utils';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -60,12 +61,12 @@ const AuthPage: React.FC = () => {
           "absolute inset-0 w-full h-full z-0",
           "[mask-image:radial-gradient(ellipse_at_center,white_60%,transparent_95%)]",
         )}
-        count={50}
-        pointColor="rgba(66, 153, 225, 0.6)" // blue-400 with opacity
-        lineColor="rgba(66, 153, 225, 0.3)" // blue-400 with less opacity
-        pointSize={2}
+        count={100}
+        pointColor="rgb(255, 255, 255)"
+        lineColor="rgba(79, 122, 158, 0.24)"
+        pointSize={1.5}
         pointDuration={3000}
-        cursorEffect={200}
+        cursorEffect={150}
       />
 
       {/* Navbar with blurred background */}
@@ -222,12 +223,8 @@ const AuthPage: React.FC = () => {
         </div>
       </main>
 
-      {/* Footer with blurred background */}
-      <footer className="relative z-10 py-4 px-6 text-center border-t border-gray-800/50 bg-gradient-to-r from-black/80 via-black/85 to-black/80 backdrop-blur-xl">
-        <p className="text-gray-500">
-          © 2025 Clara. All rights reserved.
-        </p>
-      </footer>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

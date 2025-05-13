@@ -7,8 +7,12 @@ import { PulsatingButton } from "@/components/magicui/pulsating-button";
 import { ShinyButton } from "@/components/magicui/shiny-button";
 import { InteractiveGridPattern } from "@/components/magicui/interactive-grid-pattern";
 import { TextReveal } from "@/components/magicui/text-reveal";
+import { FeaturesSection } from "@/components/features-section";
+import { TestimonialsSection } from "@/components/testimonials-section";
+import Footer from "@/components/footer";
 import { ArrowRight } from 'lucide-react';
 import AuthPage from '@/pages/auth/AuthPage';
+import '@/styles/globals.css';
 
 // HomePage component (formerly the App content)
 const HomePage: React.FC = () => {
@@ -122,28 +126,30 @@ const HomePage: React.FC = () => {
         <div className="w-full" ref={textRevealRef}>
           <div className="h-[50vh]"></div> {/* Increased spacer before animation starts */}
           
-          <TextReveal className="h-[50vh] text-white">
+          <TextReveal className="h-[30vh] text-white">
             <span className="text-5xl md:text-6xl lg:text-7xl font-bold whitespace-nowrap">
               Meet Clara, an AI powered medical companion.
             </span>
           </TextReveal>
           
-          <TextReveal className="h-[50vh]">
-            <span className="text-xl md:text-2xl lg:text-3xl text-blue-500">
+          <TextReveal className="h-[30vh]">
+            <span className="text-xl md:text-2xl lg:text-3xl text-blue-300">
               Understand Your Health. Feel Better, Sooner.
             </span>
           </TextReveal>
           
           <div className="h-[30vh]"></div> {/* Spacer after animation ends */}
         </div>
+
+        {/* Features Section */}
+        <FeaturesSection />
+        
+        {/* Testimonials Section */}
+        <TestimonialsSection />
       </main>
 
-      {/* Footer with blurred background */}
-      <footer className="relative z-10 py-6 px-6 text-center border-t border-gray-800/50 bg-gradient-to-r from-black/80 via-black/85 to-black/80 backdrop-blur-xl">
-        <p className="text-gray-500">
-          © 2025 Clara. All rights reserved.
-        </p>
-      </footer>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
