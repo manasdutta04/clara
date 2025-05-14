@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Your Firebase configuration
 // Replace these with your actual Firebase project configuration from Firebase console
@@ -16,11 +18,15 @@ const firebaseConfig = {
 let app;
 let auth;
 let googleProvider;
+let firestore;
+let storage;
 
 try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
+  firestore = getFirestore(app);
+  storage = getStorage(app);
   
   // Add scopes for Google provider (optional)
   googleProvider.addScope('profile');
@@ -36,4 +42,4 @@ try {
   throw new Error("Failed to initialize Firebase. Please check your configuration.");
 }
 
-export { auth, googleProvider }; 
+export { auth, googleProvider, firestore, storage }; 
