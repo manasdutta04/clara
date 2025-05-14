@@ -22,6 +22,7 @@ import Dashboard from './pages/dashboard/Dashboard';
 import { AuthProvider } from './lib/auth-context';
 import { LanguageProvider, useLanguage } from './lib/language-context';
 import ProtectedRoute from './components/protected-route';
+import Layout from './components/layout';
     
 // HomePage component (formerly the App content)
 const HomePage: React.FC = () => {
@@ -60,51 +61,9 @@ const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-screen overflow-x-hidden flex flex-col bg-black text-gray-100 transition-colors duration-300 relative font-sans">
-      {/* Interactive Grid Pattern Background */}
-      <InteractiveGridPattern
-        className={cn(
-          "absolute inset-0 w-full h-full z-0",
-          "[mask-image:radial-gradient(ellipse_at_center,white_60%,transparent_95%)]",
-        )}
-        count={100}
-        pointColor="rgb(255, 255, 255)"
-        lineColor="rgba(79, 122, 158, 0.24)"
-        pointSize={1.5}
-        pointDuration={3000}
-        cursorEffect={150}
-      />
-      
-      {/* Navbar with blurred background - reduced height */}
-      <nav className="relative z-10 w-full py-2 px-4 border-b border-gray-800/50 bg-gradient-to-r from-black/80 via-black/85 to-black/80 backdrop-blur-xl shadow-lg shadow-black/20">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
-          {/* App Name */}
-          <div className="text-xl font-bold text-gray-200">Clara</div>
-          
-          {/* Login/Signup Buttons */}
-          <div className="flex space-x-2 items-center">
-            <Link to="/auth">
-              <RippleButton 
-                rippleColor="#ADD8E6" 
-                className="py-1 px-3 text-sm bg-transparent hover:bg-gray-800 text-gray-200 font-medium rounded-lg"
-              >
-                {t('login')}
-              </RippleButton>
-            </Link>
-            <Link to="/auth?mode=signup">
-              <RippleButton 
-                rippleColor="#ADD8E6"
-                className="py-1.5 px-4 text-sm bg-white hover:bg-gray-100 text-black font-medium rounded-full"
-              >
-                {t('signup')}
-              </RippleButton>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+    <div className="min-h-screen w-full">
       {/* Main Content */}
-      <main className="relative z-10 flex-grow flex flex-col items-center justify-center pt-10 w-full overflow-x-hidden">
+      <div className="relative z-10 flex-grow flex flex-col items-center justify-center pt-10 w-full overflow-x-hidden">
         {/* Floating Badge with Shiny Effect */}
         <CoolMode>
           <ShinyButton className="mb-6 bg-gray-950 border border-gray-800/50 rounded-full px-4 py-1.5 text-gray-400 text-sm">
@@ -158,10 +117,7 @@ const HomePage: React.FC = () => {
         
         {/* Testimonials Section */}
         <TestimonialsSection />
-      </main>
-
-      {/* Footer */}
-      <Footer />
+      </div>
     </div>
   );
 }
@@ -179,15 +135,15 @@ const App: React.FC = () => {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/" element={<Layout><HomePage /></Layout>} />
+            <Route path="/auth" element={<Layout><AuthPage /></Layout>} />
             
             {/* Protected Routes */}
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/medical-history" element={<ProtectedRoute><MedicalHistory /></ProtectedRoute>} />
-            <Route path="/lab-report-analysis" element={<ProtectedRoute><LabReportAnalysis /></ProtectedRoute>} />
-            <Route path="/ai-diagnosis" element={<ProtectedRoute><AiDiagnosis /></ProtectedRoute>} />
-            <Route path="/mental-health-chatbot" element={<ProtectedRoute><MentalHealthChatbot /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+            <Route path="/medical-history" element={<ProtectedRoute><Layout><MedicalHistory /></Layout></ProtectedRoute>} />
+            <Route path="/lab-report-analysis" element={<ProtectedRoute><Layout><LabReportAnalysis /></Layout></ProtectedRoute>} />
+            <Route path="/ai-diagnosis" element={<ProtectedRoute><Layout><AiDiagnosis /></Layout></ProtectedRoute>} />
+            <Route path="/mental-health-chatbot" element={<ProtectedRoute><Layout><MentalHealthChatbot /></Layout></ProtectedRoute>} />
           </Routes>
         </Router>
       </AuthProvider>

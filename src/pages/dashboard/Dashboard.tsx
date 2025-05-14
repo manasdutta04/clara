@@ -1,23 +1,13 @@
 import React from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/language-context';
-import { cn } from '@/lib/utils';
-import { InteractiveGridPattern } from '@/components/magicui/interactive-grid-pattern';
+import { Link } from 'react-router-dom';
+import { Activity, FileText, Brain, MessageSquare } from 'lucide-react';
 import { MagicCard } from '@/components/magicui/magic-card';
-import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, User, Activity, FileText, Brain, MessageSquare } from 'lucide-react';
-import Footer from '@/components/footer';
-import LanguageSelector from '@/components/language-selector';
 
 const Dashboard: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { t } = useLanguage();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
 
   const dashboardFeatures = [
     {
@@ -51,118 +41,67 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen w-screen overflow-x-hidden flex flex-col bg-black text-gray-100 transition-colors duration-300 relative font-sans">
-      {/* Interactive Grid Pattern Background */}
-      <InteractiveGridPattern
-        className={cn(
-          "absolute inset-0 w-full h-full z-0",
-          "[mask-image:radial-gradient(ellipse_at_center,white_60%,transparent_95%)]",
-        )}
-        count={100}
-        pointColor="rgb(255, 255, 255)"
-        lineColor="rgba(79, 122, 158, 0.24)"
-        pointSize={1.5}
-        pointDuration={3000}
-        cursorEffect={150}
-      />
+    <div className="w-full max-w-6xl mx-auto px-4">
+      {/* Welcome Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">{t('welcome')}, {user?.name}</h1>
+        <p className="text-gray-400">{t('dashboardReady')}</p>
+      </div>
 
-      {/* Navbar with blurred background */}
-      <nav className="sticky top-0 z-[900] w-full py-3 px-4 border-b border-gray-800/50 bg-gradient-to-r from-black/95 via-black/95 to-black/95 backdrop-blur-xl shadow-lg shadow-black/20">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
-          {/* App Name */}
-          <Link to="/dashboard" className="text-xl font-bold text-gray-200">Clara</Link>
-          
-          {/* User Profile, Language Selector, and Logout */}
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <div className="h-8 w-8 rounded-full bg-gray-800 flex items-center justify-center mr-2">
-                <User className="h-4 w-4 text-gray-300" />
-              </div>
-              <span className="text-sm font-medium text-gray-300">{user?.name}</span>
-            </div>
-            
-            {/* Language Selector */}
-            <LanguageSelector />
-            
-            <button 
-              onClick={handleLogout}
-              className="flex items-center text-gray-400 hover:text-gray-200 transition-colors"
+      {/* Dashboard Features */}
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-10 mb-12">
+        {dashboardFeatures.map((feature, index) => (
+          <Link 
+            to={feature.link} 
+            key={index}
+            className="block group"
+          >
+            <MagicCard
+              gradientColor={
+                feature.title === t('medicalHistory') ? "#083260" :
+                feature.title === t('labReportAnalysis') ? "#0A3A22" :
+                feature.title === t('aiDiagnosis') ? "#2A0A3A" :
+                "#3A0A1E"
+              }
+              borderRadius="1.5rem"
+              className="h-full"
             >
-              <LogOut className="h-4 w-4 mr-1" />
-              <span className="text-sm">{t('logout')}</span>
-            </button>
+              <div className="flex items-start p-16">
+                <div className="p-3 rounded-lg bg-gray-900/70 mr-4">
+                  {feature.icon}
+                </div>
+                <div>
+                  <h3 className="font-medium text-xl text-white mb-2">{feature.title}</h3>
+                  <p className="text-base text-gray-400">{feature.description}</p>
+                </div>
+              </div>
+            </MagicCard>
+          </Link>
+        ))}
+      </div>
+
+      {/* Health Summary Section */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-white mb-4">{t('healthSummary')}</h2>
+        <div className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6">
+          <div className="text-center py-8">
+            <Activity className="h-12 w-12 text-blue-400 mx-auto mb-3" />
+            <p className="text-gray-300 mb-2">{t('healthDataWillAppear')}</p>
+            <p className="text-sm text-gray-500">{t('trackHealthMetrics')}</p>
           </div>
         </div>
-      </nav>
+      </div>
 
-      {/* Main Content */}
-      <main className="relative z-[100] flex-grow flex flex-col items-center py-10 w-full overflow-hidden">
-        <div className="w-full max-w-6xl mx-auto px-4">
-          {/* Welcome Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">{t('welcome')}, {user?.name}</h1>
-            <p className="text-gray-400">{t('dashboardReady')}</p>
-          </div>
-
-          {/* Dashboard Features */}
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-10 mb-12">
-            {dashboardFeatures.map((feature, index) => (
-              <Link 
-                to={feature.link} 
-                key={index}
-                className="block group"
-              >
-                <MagicCard
-                  gradientColor={
-                    feature.title === t('medicalHistory') ? "#083260" :
-                    feature.title === t('labReportAnalysis') ? "#0A3A22" :
-                    feature.title === t('aiDiagnosis') ? "#2A0A3A" :
-                    "#3A0A1E"
-                  }
-                  borderRadius="1.5rem"
-                  className="h-full"
-                >
-                  <div className="flex items-start p-16">
-                    <div className="p-3 rounded-lg bg-gray-900/70 mr-4">
-                      {feature.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-xl text-white mb-2">{feature.title}</h3>
-                      <p className="text-base text-gray-400">{feature.description}</p>
-                    </div>
-                  </div>
-                </MagicCard>
-              </Link>
-            ))}
-          </div>
-
-          {/* Health Summary Section */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">{t('healthSummary')}</h2>
-            <div className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6">
-              <div className="text-center py-8">
-                <Activity className="h-12 w-12 text-blue-400 mx-auto mb-3" />
-                <p className="text-gray-300 mb-2">{t('healthDataWillAppear')}</p>
-                <p className="text-sm text-gray-500">{t('trackHealthMetrics')}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Activity Section */}
-          <div>
-            <h2 className="text-xl font-semibold text-white mb-4">{t('recentActivity')}</h2>
-            <div className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6">
-              <div className="text-center py-8">
-                <p className="text-gray-300 mb-2">{t('noRecentActivity')}</p>
-                <p className="text-sm text-gray-500">{t('recentInteractions')}</p>
-              </div>
-            </div>
+      {/* Recent Activity Section */}
+      <div>
+        <h2 className="text-xl font-semibold text-white mb-4">{t('recentActivity')}</h2>
+        <div className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6">
+          <div className="text-center py-8">
+            <p className="text-gray-300 mb-2">{t('noRecentActivity')}</p>
+            <p className="text-sm text-gray-500">{t('recentInteractions')}</p>
           </div>
         </div>
-      </main>
-
-      {/* Footer */}
-      <Footer />
+      </div>
     </div>
   );
 };
