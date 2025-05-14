@@ -3,6 +3,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/language-context';
 import { cn } from '@/lib/utils';
 import { InteractiveGridPattern } from '@/components/magicui/interactive-grid-pattern';
+import { MagicCard } from '@/components/magicui/magic-card';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, User, Activity, FileText, Brain, MessageSquare } from 'lucide-react';
 import Footer from '@/components/footer';
@@ -22,28 +23,28 @@ const Dashboard: React.FC = () => {
     {
       title: t('medicalHistory'),
       description: t('medicalHistoryDesc'),
-      icon: <FileText className="h-6 w-6 text-blue-400" />,
+      icon: <FileText className="h-8 w-8 text-blue-400" />,
       link: '/medical-history',
       color: 'from-blue-500/20 to-blue-600/20'
     },
     {
       title: t('labReportAnalysis'),
       description: t('labReportAnalysisDesc'),
-      icon: <Activity className="h-6 w-6 text-green-400" />,
+      icon: <Activity className="h-8 w-8 text-green-400" />,
       link: '/lab-report-analysis',
       color: 'from-green-500/20 to-green-600/20'
     },
     {
       title: t('aiDiagnosis'),
       description: t('aiDiagnosisDesc'),
-      icon: <Brain className="h-6 w-6 text-purple-400" />,
+      icon: <Brain className="h-8 w-8 text-purple-400" />,
       link: '/ai-diagnosis',
       color: 'from-purple-500/20 to-purple-600/20'
     },
     {
       title: t('mentalHealthChatbot'),
       description: t('mentalHealthChatbotDesc'),
-      icon: <MessageSquare className="h-6 w-6 text-pink-400" />,
+      icon: <MessageSquare className="h-8 w-8 text-pink-400" />,
       link: '/mental-health-chatbot',
       color: 'from-pink-500/20 to-pink-600/20'
     }
@@ -104,22 +105,33 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Dashboard Features */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-10 mb-12">
             {dashboardFeatures.map((feature, index) => (
               <Link 
                 to={feature.link} 
                 key={index}
-                className={`block p-6 rounded-xl border border-gray-800/50 bg-gradient-to-br ${feature.color} backdrop-blur-sm hover:bg-opacity-80 transition-all duration-300 hover:shadow-lg hover:shadow-blue-900/10 hover:scale-[1.02]`}
+                className="block group"
               >
-                <div className="flex items-start">
-                  <div className="p-2 rounded-lg bg-gray-900/70 mr-4">
-                    {feature.icon}
+                <MagicCard
+                  gradientColor={
+                    feature.title === t('medicalHistory') ? "#083260" :
+                    feature.title === t('labReportAnalysis') ? "#0A3A22" :
+                    feature.title === t('aiDiagnosis') ? "#2A0A3A" :
+                    "#3A0A1E"
+                  }
+                  borderRadius="1.5rem"
+                  className="h-full"
+                >
+                  <div className="flex items-start p-16">
+                    <div className="p-3 rounded-lg bg-gray-900/70 mr-4">
+                      {feature.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-xl text-white mb-2">{feature.title}</h3>
+                      <p className="text-base text-gray-400">{feature.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-lg text-white mb-1">{feature.title}</h3>
-                    <p className="text-sm text-gray-400">{feature.description}</p>
-                  </div>
-                </div>
+                </MagicCard>
               </Link>
             ))}
           </div>
