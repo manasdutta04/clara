@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2, Mail } from 'lucide-react';
 import { RippleButton } from '@/components/magicui/ripple-button';
 import { InteractiveGridPattern } from '@/components/magicui/interactive-grid-pattern';
 import { ShineBorder } from '@/components/magicui/shine-border';
@@ -18,14 +18,13 @@ interface AuthFormData {
 const AuthPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { login, signup, isAuthenticated } = useAuth();
+  const { login, signup, loginWithGoogle, isAuthenticated, error: authError, loading } = useAuth();
   const { t } = useLanguage();
   const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<AuthFormData>({
-    email: 'clara@med.in', // Pre-filled mock email
-    password: 'clara123', // Pre-filled mock password
+    email: '',
+    password: '',
     name: '',
   });
 
@@ -35,14 +34,15 @@ const AuthPage: React.FC = () => {
     const mode = params.get('mode');
     if (mode === 'signup') {
       setIsLogin(false);
-      // Clear pre-filled credentials in signup mode
-      setFormData(prev => ({
-        ...prev,
-        email: '',
-        password: ''
-      }));
     }
   }, [location]);
+
+  // Set error from auth context if present
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
@@ -55,22 +55,12 @@ const AuthPage: React.FC = () => {
     setIsLogin(!isLogin);
     setError(null);
     
-    // Reset form data based on auth mode
-    if (!isLogin) {
-      // Switching to login - set mock credentials
-      setFormData({
-        email: 'clara@med.in',
-        password: 'clara123',
-        name: '',
-      });
-    } else {
-      // Switching to signup - clear fields
-      setFormData({
-        email: '',
-        password: '',
-        name: '',
-      });
-    }
+    // Reset form data
+    setFormData({
+      email: '',
+      password: '',
+      name: '',
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,47 +71,51 @@ const AuthPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
     
     try {
       if (isLogin) {
         // Login
-        await login(formData.email, formData.password);
+        const success = await login(formData.email, formData.password);
+        if (success) {
+          navigate('/dashboard');
+        }
       } else {
         // Sign up
         if (!formData.name) {
-          throw new Error("Name is required for registration");
+          setError("Name is required for registration");
+          return;
         }
-        await signup(formData.name, formData.email, formData.password);
+        const success = await signup(formData.name, formData.email, formData.password);
+        if (success) {
+          navigate('/dashboard');
+        }
       }
-      // Navigate to dashboard on success
-      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
-    } finally {
-      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setError(null);
+      console.log("Starting Google sign-in...");
+      const success = await loginWithGoogle();
+      if (success) {
+        console.log("Google sign-in successful, navigating to dashboard");
+        navigate('/dashboard');
+      } else {
+        console.log("Google sign-in returned false");
+        setError("Failed to sign in with Google. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Google sign-in error:", err);
+      setError(err?.message || 'Google authentication failed');
     }
   };
 
   const goBack = () => {
     navigate('/');
-  };
-
-  // Auto sign in with mock credentials
-  const handleMockSignIn = () => {
-    setIsLoading(true);
-    // Simulate network delay for a better UX
-    setTimeout(async () => {
-      try {
-        await login('clara@med.in', 'clara123');
-        navigate('/dashboard');
-      } catch (err: any) {
-        setError("An error occurred during auto sign-in");
-      } finally {
-        setIsLoading(false);
-      }
-    }, 500);
   };
 
   return (
@@ -169,7 +163,7 @@ const AuthPage: React.FC = () => {
             borderRadius={12}
           />
           {/* Auth Form Header */}
-          <div className="mb-6">
+          <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-white mb-2">{isLogin ? t('login') : t('createAccount')}</h2>
             <p className="text-sm text-gray-400">
               {isLogin 
@@ -178,15 +172,42 @@ const AuthPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Auto Sign-In Button */}
-          {isLogin && (
-            <button
-              onClick={handleMockSignIn}
-              className="w-full mb-4 p-2 bg-blue-600/30 hover:bg-blue-600/40 border border-blue-500/30 rounded-md text-sm text-blue-200 font-medium transition-colors"
-            >
-              {t('quickSignIn')}
-            </button>
-          )}
+          {/* Google Sign-In Button */}
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full mb-6 py-2.5 px-4 bg-white hover:bg-gray-100 text-gray-900 font-medium rounded-md flex items-center justify-center transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+            ) : (
+              <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#EA4335"
+                />
+              </svg>
+            )}
+            {isLogin ? "Sign in with Google" : "Sign up with Google"}
+          </button>
+
+          <div className="relative flex items-center justify-center mb-6">
+            <div className="flex-grow border-t border-gray-800"></div>
+            <span className="flex-shrink mx-4 text-gray-400 text-sm">or</span>
+            <div className="flex-grow border-t border-gray-800"></div>
+          </div>
 
           {/* Error Message */}
           {error && (
@@ -250,80 +271,37 @@ const AuthPage: React.FC = () => {
               />
             </div>
 
-            {/* Forgot Password Link (only for login) */}
-            {isLogin && (
-              <div className="text-right">
-                <button 
-                  type="button" 
-                  className="text-sm text-blue-400 hover:text-blue-300"
-                >
-                  {t('forgotPassword')}
-                </button>
-              </div>
-            )}
-
             {/* Submit Button */}
-            <RippleButton 
-              rippleColor="#ADD8E6"
-              className="w-full py-2.5 mt-2 bg-white hover:bg-gray-100 text-black font-medium rounded-md flex items-center justify-center"
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isLogin ? t('signingIn') : t('creatingAccount')}
-                </>
-              ) : (
-                isLogin ? t('signIn') : t('createAccount')
-              )}
-            </RippleButton>
+            <div className="pt-2">
+              <RippleButton
+                rippleColor="#60A5FA"
+                className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                ) : (
+                  <Mail className="h-5 w-5 mr-2" />
+                )}
+                {isLogin ? t('signIn') : t('createAccount')}
+              </RippleButton>
+            </div>
+          </form>
 
-            {/* Toggle Auth Mode */}
-            <div className="text-center mt-4">
+          {/* Toggle Auth Mode */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-400">
+              {isLogin ? t('noAccount') : t('alreadyAccount')}
               <button
                 type="button"
+                className="ml-1 text-blue-400 hover:text-blue-300 font-medium focus:outline-none"
                 onClick={toggleAuthMode}
-                className="text-sm text-gray-400 hover:text-gray-300"
               >
-                {isLogin 
-                  ? t('dontHaveAccount') 
-                  : t('alreadyHaveAccount')}
-                <span className="text-blue-400 hover:text-blue-300 font-medium">
-                  {isLogin ? t('signup') : t('signIn')}
-                </span>
+                {isLogin ? t('register') : t('login')}
               </button>
-            </div>
-
-            {/* Mock Credentials Note */}
-            {isLogin && (
-              <div className="mt-4 text-center text-xs text-gray-500">
-                <p>{t('mockCredentialsNote')}</p>
-                <p className="text-gray-400 mt-1">Email: clara@med.in | Password: clara123</p>
-              </div>
-            )}
-
-            {/* Social Login Divider */}
-            <div className="relative mt-6 mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-800/70"></div>
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-gray-950/60 text-gray-400">{t('orContinueWith')}</span>
-              </div>
-            </div>
-
-            {/* Google Sign In Button */}
-            <button
-              type="button"
-              className="w-full flex items-center justify-center py-2 bg-gray-900/80 border border-gray-800/80 hover:bg-gray-900 text-gray-200 font-medium rounded-md transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" className="mr-2" viewBox="0 0 24 24">
-                <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-              </svg>
-              <span>{t('continueWithGoogle')}</span>
-            </button>
-          </form>
+            </p>
+          </div>
         </div>
       </main>
 

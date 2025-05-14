@@ -1,17 +1,29 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from 'firebase/auth';
+import { auth, googleProvider } from './firebase';
 
 interface User {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
+  photoURL?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,84 +31,125 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Check if user is already logged in from localStorage on initial load
+  // Listen for auth state changes
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
-    }
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setLoading(true);
+      if (firebaseUser) {
+        // User is signed in
+        const userData: User = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          email: firebaseUser.email,
+          photoURL: firebaseUser.photoURL
+        };
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        // User is signed out
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+      setLoading(false);
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
   }, []);
 
-  // Mock login function - in a real app, this would make an API call
+  // Login with email and password
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Check for specific mock credentials
-        if (email === 'clara@med.in' && password === 'clara123') {
-          const user = {
-            id: '1',
-            name: 'Clara Admin',
-            email: 'clara@med.in',
-          };
-          
-          setUser(user);
-          setIsAuthenticated(true);
-          localStorage.setItem('user', JSON.stringify(user));
-          resolve(true);
-        } else if (email && password) {
-          // For any other non-empty credentials
-          const user = {
-            id: '2',
-            name: email.split('@')[0], // Just use part of email as name for mock
-            email,
-          };
-          
-          setUser(user);
-          setIsAuthenticated(true);
-          localStorage.setItem('user', JSON.stringify(user));
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 800);
-    });
+    try {
+      setLoading(true);
+      setError(null);
+      await signInWithEmailAndPassword(auth, email, password);
+      setLoading(false);
+      return true;
+    } catch (err: any) {
+      setLoading(false);
+      setError(err.message || 'Failed to login');
+      return false;
+    }
   };
 
-  // Mock signup function
+  // Login with Google
+  const loginWithGoogle = async (): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log("Auth context: attempting Google sign-in");
+      
+      if (!googleProvider) {
+        console.error("Google provider is not initialized");
+        setError("Google authentication is not available");
+        setLoading(false);
+        return false;
+      }
+      
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log("Google sign-in successful:", result.user.email);
+      setLoading(false);
+      return true;
+    } catch (err: any) {
+      console.error("Google sign-in error in auth context:", err);
+      setLoading(false);
+      setError(err?.message || 'Failed to login with Google');
+      return false;
+    }
+  };
+
+  // Signup with email and password
   const signup = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (name && email && password) {
-          const user = {
-            id: '1',
-            name,
-            email,
-          };
-          
-          setUser(user);
-          setIsAuthenticated(true);
-          localStorage.setItem('user', JSON.stringify(user));
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 800);
-    });
+    try {
+      setLoading(true);
+      setError(null);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Update profile with name (would typically be done with updateProfile)
+      // For simplicity, we're just using the name in our context state
+      const userData: User = {
+        id: userCredential.user.uid,
+        name: name,
+        email: userCredential.user.email
+      };
+      setUser(userData);
+      setLoading(false);
+      return true;
+    } catch (err: any) {
+      setLoading(false);
+      setError(err.message || 'Failed to create account');
+      return false;
+    }
   };
 
-  // Logout function
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('user');
+  // Logout
+  const logout = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      await signOut(auth);
+      setLoading(false);
+    } catch (err: any) {
+      setLoading(false);
+      setError(err.message || 'Failed to logout');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, signup, logout }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        isAuthenticated, 
+        loading,
+        login, 
+        loginWithGoogle,
+        signup, 
+        logout,
+        error
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

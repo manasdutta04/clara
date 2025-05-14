@@ -136,7 +136,7 @@ const App: React.FC = () => {
         <Router>
           <Routes>
             <Route path="/" element={<Layout><HomePage /></Layout>} />
-            <Route path="/auth" element={<Layout><AuthPage /></Layout>} />
+            <Route path="/auth" element={<AuthPage />} />
             
             {/* Protected Routes */}
             <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
