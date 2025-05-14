@@ -200,7 +200,7 @@ const AuthPage: React.FC = () => {
                 />
               </svg>
             )}
-            {isLogin ? "Sign in with Google" : "Sign up with Google"}
+            <span>{isLogin ? "Sign in with Google" : "Sign up with Google"}</span>
           </button>
 
           <div className="relative flex items-center justify-center mb-6">
@@ -282,9 +282,8 @@ const AuthPage: React.FC = () => {
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin mr-2" />
                 ) : (
-                  <Mail className="h-5 w-5 mr-2" />
+                  isLogin ? t('signIn') : t('createAccount')
                 )}
-                {isLogin ? t('signIn') : t('createAccount')}
               </RippleButton>
             </div>
           </form>
