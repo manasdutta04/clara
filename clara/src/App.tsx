@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui/button';
@@ -18,11 +18,14 @@ import MedicalHistory from './pages/MedicalHistory';
 import LabReportAnalysis from './pages/LabReportAnalysis';
 import AiDiagnosis from './pages/AiDiagnosis';
 import MentalHealthChatbot from './pages/MentalHealthChatbot';
+import Dashboard from './pages/dashboard/Dashboard';
+import { AuthProvider } from './lib/auth-context';
+import ProtectedRoute from './components/protected-route';
     
 // HomePage component (formerly the App content)
 const HomePage: React.FC = () => {
-  const textRevealRef = useRef<HTMLDivElement>(null);
-  const [isSticky, setIsSticky] = useState(false);
+  const textRevealRef = React.useRef<HTMLDivElement>(null);
+  const [isSticky, setIsSticky] = React.useState(false);
   
   // Handle scroll effects
   useEffect(() => {
@@ -168,17 +171,22 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/language" element={<MultilingualSupport />} />
-        <Route path="/medical-history" element={<MedicalHistory />} />
-        <Route path="/lab-report-analysis" element={<LabReportAnalysis />} />
-        <Route path="/ai-diagnosis" element={<AiDiagnosis />} />
-        <Route path="/mental-health-chatbot" element={<MentalHealthChatbot />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/auth" element={<AuthPage />} />
+          
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/language" element={<ProtectedRoute><MultilingualSupport /></ProtectedRoute>} />
+          <Route path="/medical-history" element={<ProtectedRoute><MedicalHistory /></ProtectedRoute>} />
+          <Route path="/lab-report-analysis" element={<ProtectedRoute><LabReportAnalysis /></ProtectedRoute>} />
+          <Route path="/ai-diagnosis" element={<ProtectedRoute><AiDiagnosis /></ProtectedRoute>} />
+          <Route path="/mental-health-chatbot" element={<ProtectedRoute><MentalHealthChatbot /></ProtectedRoute>} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

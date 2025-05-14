@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { RippleButton } from '@/components/magicui/ripple-button';
 import { InteractiveGridPattern } from '@/components/magicui/interactive-grid-pattern';
 import { ShineBorder } from '@/components/magicui/shine-border';
 import Footer from '@/components/footer';
 import { cn } from '@/lib/utils';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/lib/auth-context';
 
 interface AuthFormData {
   email: string;
@@ -16,10 +17,13 @@ interface AuthFormData {
 const AuthPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { login, signup, isAuthenticated } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<AuthFormData>({
-    email: '',
-    password: '',
+    email: 'clara@med.in', // Pre-filled mock email
+    password: 'clara123', // Pre-filled mock password
     name: '',
   });
 
@@ -29,28 +33,113 @@ const AuthPage: React.FC = () => {
     const mode = params.get('mode');
     if (mode === 'signup') {
       setIsLogin(false);
+      // Clear pre-filled credentials in signup mode
+      setFormData(prev => ({
+        ...prev,
+        email: '',
+        password: ''
+      }));
     }
   }, [location]);
 
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
+    setError(null);
+    
+    // Reset form data based on auth mode
+    if (!isLogin) {
+      // Switching to login - set mock credentials
+      setFormData({
+        email: 'clara@med.in',
+        password: 'clara123',
+        name: '',
+      });
+    } else {
+      // Switching to signup - clear fields
+      setFormData({
+        email: '',
+        password: '',
+        name: '',
+      });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle authentication logic here
-    console.log('Form submitted:', formData);
-    // After successful authentication, redirect to home or dashboard
-    // navigate('/');
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      let success = false;
+      
+      if (isLogin) {
+        success = await login(formData.email, formData.password);
+      } else {
+        if (!formData.name) {
+          setError("Name is required");
+          setIsLoading(false);
+          return;
+        }
+        success = await signup(formData.name, formData.email, formData.password);
+      }
+      
+      if (success) {
+        navigate('/dashboard');
+      } else {
+        setError(isLogin ? "Invalid email or password" : "Registration failed");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const goBack = () => {
     navigate('/');
+  };
+
+  // Helper for auto sign-in with mock account
+  const handleMockSignIn = () => {
+    if (!isLogin) {
+      setIsLogin(true);
+      setFormData({
+        email: 'clara@med.in',
+        password: 'clara123',
+        name: '',
+      });
+    }
+    setIsLoading(true);
+    
+    // Auto-submit the form after a brief delay
+    setTimeout(async () => {
+      try {
+        const success = await login('clara@med.in', 'clara123');
+        if (success) {
+          navigate('/dashboard');
+        } else {
+          setError("Auto sign-in failed");
+        }
+      } catch (err) {
+        setError("An error occurred during auto sign-in");
+      } finally {
+        setIsLoading(false);
+      }
+    }, 500);
   };
 
   return (
@@ -106,6 +195,23 @@ const AuthPage: React.FC = () => {
                 : 'Join Clara and start your health journey'}
             </p>
           </div>
+
+          {/* Auto Sign-In Button */}
+          {isLogin && (
+            <button
+              onClick={handleMockSignIn}
+              className="w-full mb-4 p-2 bg-blue-600/30 hover:bg-blue-600/40 border border-blue-500/30 rounded-md text-sm text-blue-200 font-medium transition-colors"
+            >
+              Quick Sign-In with Mock Account
+            </button>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-900/30 border border-red-800/50 rounded-md text-sm text-red-200">
+              {error}
+            </div>
+          )}
 
           {/* Auth Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -177,10 +283,18 @@ const AuthPage: React.FC = () => {
             {/* Submit Button */}
             <RippleButton 
               rippleColor="#ADD8E6"
-              className="w-full py-2.5 mt-2 bg-white hover:bg-gray-100 text-black font-medium rounded-md"
+              className="w-full py-2.5 mt-2 bg-white hover:bg-gray-100 text-black font-medium rounded-md flex items-center justify-center"
               type="submit"
+              disabled={isLoading}
             >
-              {isLogin ? 'Sign In' : 'Create account'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {isLogin ? 'Signing In...' : 'Creating account...'}
+                </>
+              ) : (
+                isLogin ? 'Sign In' : 'Create account'
+              )}
             </RippleButton>
 
             {/* Toggle Auth Mode */}
@@ -198,6 +312,14 @@ const AuthPage: React.FC = () => {
                 </span>
               </button>
             </div>
+
+            {/* Mock Credentials Note */}
+            {isLogin && (
+              <div className="mt-4 text-center text-xs text-gray-500">
+                <p>Mock credentials are pre-filled for testing:</p>
+                <p className="text-gray-400 mt-1">Email: clara@med.in | Password: clara123</p>
+              </div>
+            )}
 
             {/* Social Login Divider */}
             <div className="relative mt-6 mb-4">
