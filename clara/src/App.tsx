@@ -7,6 +7,7 @@ import { PulsatingButton } from "@/components/magicui/pulsating-button";
 import { ShinyButton } from "@/components/magicui/shiny-button";
 import { InteractiveGridPattern } from "@/components/magicui/interactive-grid-pattern";
 import { TextReveal } from "@/components/magicui/text-reveal";
+import { CoolMode } from "@/components/magicui/cool-mode";
 import { FeaturesSection } from "@/components/features-section";
 import { TestimonialsSection } from "@/components/testimonials-section";
 import Footer from "@/components/footer";
@@ -105,11 +106,13 @@ const HomePage: React.FC = () => {
       {/* Main Content */}
       <main className="relative z-10 flex-grow flex flex-col items-center justify-center pt-10 w-full overflow-x-hidden">
         {/* Floating Badge with Shiny Effect */}
-        <ShinyButton className="mb-6 bg-gray-950 border border-gray-800/50 rounded-full px-4 py-1.5 text-gray-400 text-sm">
-          <span className="mr-2 text-amber-500">✨</span>
-          <span className="font-medium">{t('introducing')} Clara</span>
-          <ArrowRight className="ml-2 h-3 w-3 inline" />
-        </ShinyButton>
+        <CoolMode>
+          <ShinyButton className="mb-6 bg-gray-950 border border-gray-800/50 rounded-full px-4 py-1.5 text-gray-400 text-sm">
+            <span className="mr-2 text-amber-500">✨</span>
+            <span className="font-medium">{t('introducing')} Clara</span>
+            <ArrowRight className="ml-2 h-3 w-3 inline" />
+          </ShinyButton>
+        </CoolMode>
         
         <div className="text-center w-full max-w-4xl mx-auto px-4">
           <h1 className="tracking-tighter leading-tight mb-8">
