@@ -19,13 +19,14 @@ import AiDiagnosis from './pages/AiDiagnosis';
 import MentalHealthChatbot from './pages/MentalHealthChatbot';
 import Dashboard from './pages/dashboard/Dashboard';
 import { AuthProvider } from './lib/auth-context';
-import { LanguageProvider } from './lib/language-context';
+import { LanguageProvider, useLanguage } from './lib/language-context';
 import ProtectedRoute from './components/protected-route';
     
 // HomePage component (formerly the App content)
 const HomePage: React.FC = () => {
   const textRevealRef = React.useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = React.useState(false);
+  const { t } = useLanguage();
   
   // Handle scroll effects
   useEffect(() => {
@@ -86,7 +87,7 @@ const HomePage: React.FC = () => {
                 rippleColor="#ADD8E6" 
                 className="py-1 px-3 text-sm bg-transparent hover:bg-gray-800 text-gray-200 font-medium rounded-lg"
               >
-                Log in
+                {t('login')}
               </RippleButton>
             </Link>
             <Link to="/auth?mode=signup">
@@ -94,7 +95,7 @@ const HomePage: React.FC = () => {
                 rippleColor="#ADD8E6"
                 className="py-1.5 px-4 text-sm bg-white hover:bg-gray-100 text-black font-medium rounded-full"
               >
-                Sign up
+                {t('signup')}
               </RippleButton>
             </Link>
           </div>
@@ -106,24 +107,24 @@ const HomePage: React.FC = () => {
         {/* Floating Badge with Shiny Effect */}
         <ShinyButton className="mb-6 bg-gray-950 border border-gray-800/50 rounded-full px-4 py-1.5 text-gray-400 text-sm">
           <span className="mr-2 text-amber-500">✨</span>
-          <span className="font-medium">Introducing Clara</span>
+          <span className="font-medium">{t('introducing')} Clara</span>
           <ArrowRight className="ml-2 h-3 w-3 inline" />
         </ShinyButton>
         
         <div className="text-center w-full max-w-4xl mx-auto px-4">
           <h1 className="tracking-tighter leading-tight mb-8">
             <span className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold block mb-2 text-white">Clara</span>
-            <span className="text-4xl sm:text-5xl md:text-6xl font-medium block bg-gradient-to-r from-white via-blue-300 to-blue-500 text-transparent bg-clip-text animate-gradient-x bg-300%">your health buddy.</span>
+            <span className="text-4xl sm:text-5xl md:text-6xl font-medium block bg-gradient-to-r from-white via-blue-300 to-blue-500 text-transparent bg-clip-text animate-gradient-x bg-300%">{t('healthBuddy')}</span>
           </h1>
           <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Beautifully designed, intelligent AI medical companion built with
+            {t('homeDescription')}
             <br className="hidden md:block" />
-            modern technology to provide personalized health insights.
+            {t('homeDescriptionCont')}
           </p>
           <div className="flex justify-center items-center">
             <Link to="/auth?mode=signup">
               <PulsatingButton className="inline-flex items-center whitespace-nowrap">
-                <span>Get Started for free</span>
+                <span>{t('getStarted')}</span>
                 <ArrowRight className="ml-1.5 h-3 w-3 inline" />
               </PulsatingButton>
             </Link>
@@ -136,13 +137,13 @@ const HomePage: React.FC = () => {
           
           <TextReveal className="h-[30vh] text-white">
             <span className="text-5xl md:text-6xl lg:text-7xl font-bold whitespace-nowrap">
-              Meet Clara, an AI powered medical companion.
+              {t('meetClara')}
             </span>
           </TextReveal>
           
           <TextReveal className="h-[30vh]">
             <span className="text-xl md:text-2xl lg:text-3xl text-blue-300">
-              Understand Your Health. Feel Better, Sooner.
+              {t('healthTagline')}
             </span>
           </TextReveal>
           

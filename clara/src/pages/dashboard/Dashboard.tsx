@@ -21,28 +21,28 @@ const Dashboard: React.FC = () => {
   const dashboardFeatures = [
     {
       title: t('medicalHistory'),
-      description: 'View and manage your medical records',
+      description: t('medicalHistoryDesc'),
       icon: <FileText className="h-6 w-6 text-blue-400" />,
       link: '/medical-history',
       color: 'from-blue-500/20 to-blue-600/20'
     },
     {
       title: t('labReportAnalysis'),
-      description: 'Get insights from your lab test results',
+      description: t('labReportAnalysisDesc'),
       icon: <Activity className="h-6 w-6 text-green-400" />,
       link: '/lab-report-analysis',
       color: 'from-green-500/20 to-green-600/20'
     },
     {
       title: t('aiDiagnosis'),
-      description: 'Get preliminary diagnosis based on symptoms',
+      description: t('aiDiagnosisDesc'),
       icon: <Brain className="h-6 w-6 text-purple-400" />,
       link: '/ai-diagnosis',
       color: 'from-purple-500/20 to-purple-600/20'
     },
     {
       title: t('mentalHealthChatbot'),
-      description: 'Talk to our AI mental health assistant',
+      description: t('mentalHealthChatbotDesc'),
       icon: <MessageSquare className="h-6 w-6 text-pink-400" />,
       link: '/mental-health-chatbot',
       color: 'from-pink-500/20 to-pink-600/20'
@@ -100,7 +100,7 @@ const Dashboard: React.FC = () => {
           {/* Welcome Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">{t('welcome')}, {user?.name}</h1>
-            <p className="text-gray-400">Your health dashboard is ready. What would you like to do today?</p>
+            <p className="text-gray-400">{t('dashboardReady')}</p>
           </div>
 
           {/* Dashboard Features */}
@@ -130,8 +130,8 @@ const Dashboard: React.FC = () => {
             <div className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6">
               <div className="text-center py-8">
                 <Activity className="h-12 w-12 text-blue-400 mx-auto mb-3" />
-                <p className="text-gray-300 mb-2">Your health data will appear here once you start using Clara's features.</p>
-                <p className="text-sm text-gray-500">Track your health metrics, lab results, and get personalized insights.</p>
+                <p className="text-gray-300 mb-2">{t('healthDataWillAppear')}</p>
+                <p className="text-sm text-gray-500">{t('trackHealthMetrics')}</p>
               </div>
             </div>
           </div>
@@ -141,8 +141,8 @@ const Dashboard: React.FC = () => {
             <h2 className="text-xl font-semibold text-white mb-4">{t('recentActivity')}</h2>
             <div className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6">
               <div className="text-center py-8">
-                <p className="text-gray-300 mb-2">No recent activity yet.</p>
-                <p className="text-sm text-gray-500">Your recent interactions with Clara will appear here.</p>
+                <p className="text-gray-300 mb-2">{t('noRecentActivity')}</p>
+                <p className="text-sm text-gray-500">{t('recentInteractions')}</p>
               </div>
             </div>
           </div>

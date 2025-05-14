@@ -1,38 +1,41 @@
 import React from "react";
 import { FeatureCard } from "./magicui/feature-card";
 import { MessageCircle, FileText, Stethoscope, Video, ClipboardList, Bell } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 
 export const FeaturesSection: React.FC = () => {
+  const { t } = useLanguage();
+  
   const features = [
     {
       icon: <MessageCircle className="h-6 w-6" />,
-      title: "Mental Health Chatbot",
-      description: "AI-powered chat interface to help with stress, anxiety, and depression with personalized advice and support."
+      title: t('mentalHealthChatbot'),
+      description: t('mentalHealthChatbotLong')
     },
     {
       icon: <FileText className="h-6 w-6" />,
-      title: "Lab Report Analysis",
-      description: "Upload medical reports and scans to get AI-powered explanations in simple language you can understand."
+      title: t('labReportAnalysis'),
+      description: t('labReportAnalysisLong')
     },
     {
       icon: <Stethoscope className="h-6 w-6" />,
-      title: "AI Diagnosis",
-      description: "Receive preliminary assessments with probability indicators, suggested precautions, and recommended OTC medicines."
+      title: t('aiDiagnosis'),
+      description: t('aiDiagnosisLong')
     },
     {
       icon: <Video className="h-6 w-6" />,
-      title: "Telemedicine Integration",
-      description: "Connect with healthcare professionals through secure video calls and share your medical data seamlessly."
+      title: t('telemedicine'),
+      description: t('telemedicineLong')
     },
     {
       icon: <ClipboardList className="h-6 w-6" />,
-      title: "Medical History",
-      description: "Access your complete medical timeline with saved consultations, reports, and track health progress over time."
+      title: t('medicalHistory'),
+      description: t('medicalHistoryLong')
     },
     {
       icon: <Bell className="h-6 w-6" />,
-      title: "Health Reminders",
-      description: "Get personalized reminders for medications, appointments, and health check-ups to stay on track with your care plan."
+      title: t('healthReminders'),
+      description: t('healthRemindersLong')
     }
   ];
 
@@ -41,10 +44,10 @@ export const FeaturesSection: React.FC = () => {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold mb-3 text-white">
-            Features that <span className="text-blue-300">empower</span> your health journey
+            {t('featuresHeading')} <span className="text-blue-300">{t('empower')}</span> {t('yourHealthJourney')}
           </h2>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            Clara combines cutting-edge AI technology with user-friendly design to provide comprehensive health support.
+            {t('featuresSubheading')}
           </p>
         </div>
 

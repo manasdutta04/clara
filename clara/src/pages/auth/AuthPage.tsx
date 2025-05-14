@@ -5,8 +5,9 @@ import { InteractiveGridPattern } from '@/components/magicui/interactive-grid-pa
 import { ShineBorder } from '@/components/magicui/shine-border';
 import Footer from '@/components/footer';
 import { cn } from '@/lib/utils';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth-context';
+import { useLanguage } from '@/lib/language-context';
 
 interface AuthFormData {
   email: string;
@@ -18,6 +19,7 @@ const AuthPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { login, signup, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,27 +85,20 @@ const AuthPage: React.FC = () => {
     setError(null);
     
     try {
-      let success = false;
-      
       if (isLogin) {
-        success = await login(formData.email, formData.password);
+        // Login
+        await login(formData.email, formData.password);
       } else {
+        // Sign up
         if (!formData.name) {
-          setError("Name is required");
-          setIsLoading(false);
-          return;
+          throw new Error("Name is required for registration");
         }
-        success = await signup(formData.name, formData.email, formData.password);
+        await signup(formData.name, formData.email, formData.password);
       }
-      
-      if (success) {
-        navigate('/dashboard');
-      } else {
-        setError(isLogin ? "Invalid email or password" : "Registration failed");
-      }
-    } catch (err) {
-      setError("An error occurred. Please try again.");
-      console.error(err);
+      // Navigate to dashboard on success
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed');
     } finally {
       setIsLoading(false);
     }
@@ -113,28 +108,15 @@ const AuthPage: React.FC = () => {
     navigate('/');
   };
 
-  // Helper for auto sign-in with mock account
+  // Auto sign in with mock credentials
   const handleMockSignIn = () => {
-    if (!isLogin) {
-      setIsLogin(true);
-      setFormData({
-        email: 'clara@med.in',
-        password: 'clara123',
-        name: '',
-      });
-    }
     setIsLoading(true);
-    
-    // Auto-submit the form after a brief delay
+    // Simulate network delay for a better UX
     setTimeout(async () => {
       try {
-        const success = await login('clara@med.in', 'clara123');
-        if (success) {
-          navigate('/dashboard');
-        } else {
-          setError("Auto sign-in failed");
-        }
-      } catch (err) {
+        await login('clara@med.in', 'clara123');
+        navigate('/dashboard');
+      } catch (err: any) {
         setError("An error occurred during auto sign-in");
       } finally {
         setIsLoading(false);
@@ -170,7 +152,7 @@ const AuthPage: React.FC = () => {
             className="flex items-center text-gray-400 hover:text-gray-200 transition-colors"
           >
             <ArrowLeft className="mr-1 h-4 w-4" />
-            <span>Back to home</span>
+            <span>{t('backToHome')}</span>
           </button>
         </div>
       </nav>
@@ -188,11 +170,11 @@ const AuthPage: React.FC = () => {
           />
           {/* Auth Form Header */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-white mb-2">{isLogin ? 'Login' : 'Create account'}</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">{isLogin ? t('login') : t('createAccount')}</h2>
             <p className="text-sm text-gray-400">
               {isLogin 
-                ? 'Enter your credentials to access your account' 
-                : 'Join Clara and start your health journey'}
+                ? t('enterCredentials') 
+                : t('joinClara')}
             </p>
           </div>
 
@@ -202,7 +184,7 @@ const AuthPage: React.FC = () => {
               onClick={handleMockSignIn}
               className="w-full mb-4 p-2 bg-blue-600/30 hover:bg-blue-600/40 border border-blue-500/30 rounded-md text-sm text-blue-200 font-medium transition-colors"
             >
-              Quick Sign-In with Mock Account
+              {t('quickSignIn')}
             </button>
           )}
 
@@ -219,7 +201,7 @@ const AuthPage: React.FC = () => {
             {!isLogin && (
               <div className="grid gap-2">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-300">
-                  Full Name
+                  {t('fullName')}
                 </label>
                 <input
                   type="text"
@@ -229,7 +211,7 @@ const AuthPage: React.FC = () => {
                   onChange={handleChange}
                   required={!isLogin}
                   className="w-full px-3 py-2 bg-gray-900/60 border border-gray-800/80 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-gray-100 placeholder-gray-500"
-                  placeholder="Enter your full name"
+                  placeholder={t('enterFullName')}
                 />
               </div>
             )}
@@ -237,7 +219,7 @@ const AuthPage: React.FC = () => {
             {/* Email Field */}
             <div className="grid gap-2">
               <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                Email
+                {t('email')}
               </label>
               <input
                 type="email"
@@ -254,7 +236,7 @@ const AuthPage: React.FC = () => {
             {/* Password Field */}
             <div className="grid gap-2">
               <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                Password
+                {t('password')}
               </label>
               <input
                 type="password"
@@ -264,7 +246,7 @@ const AuthPage: React.FC = () => {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 bg-gray-900/60 border border-gray-800/80 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-gray-100 placeholder-gray-500"
-                placeholder={isLogin ? "Enter your password" : "Create a password"}
+                placeholder={isLogin ? t('enterPassword') : t('createPassword')}
               />
             </div>
 
@@ -275,7 +257,7 @@ const AuthPage: React.FC = () => {
                   type="button" 
                   className="text-sm text-blue-400 hover:text-blue-300"
                 >
-                  Forgot password?
+                  {t('forgotPassword')}
                 </button>
               </div>
             )}
@@ -290,10 +272,10 @@ const AuthPage: React.FC = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isLogin ? 'Signing In...' : 'Creating account...'}
+                  {isLogin ? t('signingIn') : t('creatingAccount')}
                 </>
               ) : (
-                isLogin ? 'Sign In' : 'Create account'
+                isLogin ? t('signIn') : t('createAccount')
               )}
             </RippleButton>
 
@@ -305,10 +287,10 @@ const AuthPage: React.FC = () => {
                 className="text-sm text-gray-400 hover:text-gray-300"
               >
                 {isLogin 
-                  ? "Don't have an account? " 
-                  : "Already have an account? "}
+                  ? t('dontHaveAccount') 
+                  : t('alreadyHaveAccount')}
                 <span className="text-blue-400 hover:text-blue-300 font-medium">
-                  {isLogin ? "Sign up" : "Sign in"}
+                  {isLogin ? t('signup') : t('signIn')}
                 </span>
               </button>
             </div>
@@ -316,7 +298,7 @@ const AuthPage: React.FC = () => {
             {/* Mock Credentials Note */}
             {isLogin && (
               <div className="mt-4 text-center text-xs text-gray-500">
-                <p>Mock credentials are pre-filled for testing:</p>
+                <p>{t('mockCredentialsNote')}</p>
                 <p className="text-gray-400 mt-1">Email: clara@med.in | Password: clara123</p>
               </div>
             )}
@@ -327,7 +309,7 @@ const AuthPage: React.FC = () => {
                 <div className="w-full border-t border-gray-800/70"></div>
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-gray-950/60 text-gray-400">Or continue with</span>
+                <span className="px-2 bg-gray-950/60 text-gray-400">{t('orContinueWith')}</span>
               </div>
             </div>
 
@@ -339,7 +321,7 @@ const AuthPage: React.FC = () => {
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" className="mr-2" viewBox="0 0 24 24">
                 <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
               </svg>
-              Google
+              <span>{t('continueWithGoogle')}</span>
             </button>
           </form>
         </div>

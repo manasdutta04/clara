@@ -24,7 +24,7 @@ const languages: Language[] = [
 ];
 
 const LanguageSelector: React.FC = () => {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDropdown = () => {
@@ -69,7 +69,7 @@ const LanguageSelector: React.FC = () => {
         <div className="fixed right-8 top-12 w-44 bg-gray-900 border border-gray-800 rounded-md shadow-xl z-[9999] overflow-hidden">
           {/* Region Label */}
           <div className="px-3 py-2 text-xs text-blue-400 uppercase font-medium tracking-wider border-b border-gray-800">
-            SELECT A LANGUAGE
+            {t('languageSelector')}
           </div>
           
           {/* Language List Container with scroll */}
