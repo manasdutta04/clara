@@ -1,6 +1,6 @@
 import React from "react";
 import { FeatureCard } from "./magicui/feature-card";
-import { MessageCircle, FileText, Stethoscope, Video, ClipboardList, Brain } from "lucide-react";
+import { MessageCircle, FileText, Stethoscope, Video, ClipboardList, Bell } from "lucide-react";
 
 export const FeaturesSection: React.FC = () => {
   const features = [
@@ -30,9 +30,9 @@ export const FeaturesSection: React.FC = () => {
       description: "Access your complete medical timeline with saved consultations, reports, and track health progress over time."
     },
     {
-      icon: <Brain className="h-6 w-6" />,
-      title: "Multilingual Support",
-      description: "Switch between languages for all features, making healthcare accessible regardless of language preference."
+      icon: <Bell className="h-6 w-6" />,
+      title: "Health Reminders",
+      description: "Get personalized reminders for medications, appointments, and health check-ups to stay on track with your care plan."
     }
   ];
 

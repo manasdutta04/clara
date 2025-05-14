@@ -13,13 +13,13 @@ import Footer from "@/components/footer";
 import { ArrowRight } from 'lucide-react';
 import AuthPage from '@/pages/auth/AuthPage';
 import '@/styles/globals.css';
-import MultilingualSupport from './pages/MultilingualSupport';
 import MedicalHistory from './pages/MedicalHistory';
 import LabReportAnalysis from './pages/LabReportAnalysis';
 import AiDiagnosis from './pages/AiDiagnosis';
 import MentalHealthChatbot from './pages/MentalHealthChatbot';
 import Dashboard from './pages/dashboard/Dashboard';
 import { AuthProvider } from './lib/auth-context';
+import { LanguageProvider } from './lib/language-context';
 import ProtectedRoute from './components/protected-route';
     
 // HomePage component (formerly the App content)
@@ -171,22 +171,23 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/auth" element={<AuthPage />} />
-          
-          {/* Protected Routes */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/language" element={<ProtectedRoute><MultilingualSupport /></ProtectedRoute>} />
-          <Route path="/medical-history" element={<ProtectedRoute><MedicalHistory /></ProtectedRoute>} />
-          <Route path="/lab-report-analysis" element={<ProtectedRoute><LabReportAnalysis /></ProtectedRoute>} />
-          <Route path="/ai-diagnosis" element={<ProtectedRoute><AiDiagnosis /></ProtectedRoute>} />
-          <Route path="/mental-health-chatbot" element={<ProtectedRoute><MentalHealthChatbot /></ProtectedRoute>} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/medical-history" element={<ProtectedRoute><MedicalHistory /></ProtectedRoute>} />
+            <Route path="/lab-report-analysis" element={<ProtectedRoute><LabReportAnalysis /></ProtectedRoute>} />
+            <Route path="/ai-diagnosis" element={<ProtectedRoute><AiDiagnosis /></ProtectedRoute>} />
+            <Route path="/mental-health-chatbot" element={<ProtectedRoute><MentalHealthChatbot /></ProtectedRoute>} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 

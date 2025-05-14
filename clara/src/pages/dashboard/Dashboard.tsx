@@ -1,13 +1,16 @@
 import React from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useLanguage } from '@/lib/language-context';
 import { cn } from '@/lib/utils';
 import { InteractiveGridPattern } from '@/components/magicui/interactive-grid-pattern';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, User, Activity, FileText, Brain, MessageSquare, Globe } from 'lucide-react';
+import { LogOut, User, Activity, FileText, Brain, MessageSquare } from 'lucide-react';
 import Footer from '@/components/footer';
+import LanguageSelector from '@/components/language-selector';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -17,39 +20,32 @@ const Dashboard: React.FC = () => {
 
   const dashboardFeatures = [
     {
-      title: 'Medical History',
+      title: t('medicalHistory'),
       description: 'View and manage your medical records',
       icon: <FileText className="h-6 w-6 text-blue-400" />,
       link: '/medical-history',
       color: 'from-blue-500/20 to-blue-600/20'
     },
     {
-      title: 'Lab Report Analysis',
+      title: t('labReportAnalysis'),
       description: 'Get insights from your lab test results',
       icon: <Activity className="h-6 w-6 text-green-400" />,
       link: '/lab-report-analysis',
       color: 'from-green-500/20 to-green-600/20'
     },
     {
-      title: 'AI Diagnosis',
+      title: t('aiDiagnosis'),
       description: 'Get preliminary diagnosis based on symptoms',
       icon: <Brain className="h-6 w-6 text-purple-400" />,
       link: '/ai-diagnosis',
       color: 'from-purple-500/20 to-purple-600/20'
     },
     {
-      title: 'Mental Health Chatbot',
+      title: t('mentalHealthChatbot'),
       description: 'Talk to our AI mental health assistant',
       icon: <MessageSquare className="h-6 w-6 text-pink-400" />,
       link: '/mental-health-chatbot',
       color: 'from-pink-500/20 to-pink-600/20'
-    },
-    {
-      title: 'Multilingual Support',
-      description: 'Access Clara in multiple languages',
-      icon: <Globe className="h-6 w-6 text-amber-400" />,
-      link: '/language',
-      color: 'from-amber-500/20 to-amber-600/20'
     }
   ];
 
@@ -70,12 +66,12 @@ const Dashboard: React.FC = () => {
       />
 
       {/* Navbar with blurred background */}
-      <nav className="relative z-10 w-full py-3 px-4 border-b border-gray-800/50 bg-gradient-to-r from-black/80 via-black/85 to-black/80 backdrop-blur-xl shadow-lg shadow-black/20">
+      <nav className="sticky top-0 z-[900] w-full py-3 px-4 border-b border-gray-800/50 bg-gradient-to-r from-black/95 via-black/95 to-black/95 backdrop-blur-xl shadow-lg shadow-black/20">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           {/* App Name */}
           <Link to="/dashboard" className="text-xl font-bold text-gray-200">Clara</Link>
           
-          {/* User Profile and Logout */}
+          {/* User Profile, Language Selector, and Logout */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
               <div className="h-8 w-8 rounded-full bg-gray-800 flex items-center justify-center mr-2">
@@ -83,28 +79,32 @@ const Dashboard: React.FC = () => {
               </div>
               <span className="text-sm font-medium text-gray-300">{user?.name}</span>
             </div>
+            
+            {/* Language Selector */}
+            <LanguageSelector />
+            
             <button 
               onClick={handleLogout}
               className="flex items-center text-gray-400 hover:text-gray-200 transition-colors"
             >
               <LogOut className="h-4 w-4 mr-1" />
-              <span className="text-sm">Logout</span>
+              <span className="text-sm">{t('logout')}</span>
             </button>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-grow flex flex-col items-center py-10 w-full overflow-hidden">
+      <main className="relative z-[100] flex-grow flex flex-col items-center py-10 w-full overflow-hidden">
         <div className="w-full max-w-6xl mx-auto px-4">
           {/* Welcome Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome back, {user?.name}</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">{t('welcome')}, {user?.name}</h1>
             <p className="text-gray-400">Your health dashboard is ready. What would you like to do today?</p>
           </div>
 
           {/* Dashboard Features */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-12">
             {dashboardFeatures.map((feature, index) => (
               <Link 
                 to={feature.link} 
@@ -126,7 +126,7 @@ const Dashboard: React.FC = () => {
 
           {/* Health Summary Section */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Your Health Summary</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('healthSummary')}</h2>
             <div className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6">
               <div className="text-center py-8">
                 <Activity className="h-12 w-12 text-blue-400 mx-auto mb-3" />
@@ -138,7 +138,7 @@ const Dashboard: React.FC = () => {
 
           {/* Recent Activity Section */}
           <div>
-            <h2 className="text-xl font-semibold text-white mb-4">Recent Activity</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('recentActivity')}</h2>
             <div className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6">
               <div className="text-center py-8">
                 <p className="text-gray-300 mb-2">No recent activity yet.</p>

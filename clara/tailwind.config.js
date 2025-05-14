@@ -87,5 +87,27 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.scrollbar-thin': {
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+        },
+        '.scrollbar-thumb-gray-700': {
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(55, 65, 81, 0.5)',
+            borderRadius: '3px',
+          },
+        },
+        '.scrollbar-track-transparent': {
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'transparent',
+          },
+        },
+      }
+      addUtilities(newUtilities);
+    }
+  ],
 }; 
