@@ -13,11 +13,14 @@ import {
   Pill,
   Stethoscope,
   User,
-  Calendar as CalendarIcon, 
-  ChevronLeft, 
-  ChevronUp,
+  Calendar as CalendarIcon,
   Download,
-  Share2
+  Share2,
+  Plus,
+  X,
+  ExternalLink,
+  ChevronUp,
+  Eye
 } from 'lucide-react';
 
 interface MedicalEvent {
@@ -184,32 +187,38 @@ const eventTypeConfig: {
   [key: string]: {
     icon: React.ReactNode;
     color: string;
+    bgColor: string;
     label: string;
   }
 } = {
   consultation: { 
-    icon: <Stethoscope size={20} />, 
-    color: 'border-blue-500 bg-blue-500/10 text-blue-500', 
+    icon: <Stethoscope size={18} />, 
+    color: 'text-blue-500 border-blue-500', 
+    bgColor: 'bg-blue-500/10',
     label: 'Consultation' 
   },
   report: { 
-    icon: <FileBarChart size={20} />, 
-    color: 'border-green-500 bg-green-500/10 text-green-500', 
+    icon: <FileBarChart size={18} />, 
+    color: 'text-emerald-500 border-emerald-500', 
+    bgColor: 'bg-emerald-500/10',
     label: 'Medical Report' 
   },
   medication: { 
-    icon: <Pill size={20} />, 
-    color: 'border-purple-500 bg-purple-500/10 text-purple-500', 
+    icon: <Pill size={18} />, 
+    color: 'text-purple-500 border-purple-500', 
+    bgColor: 'bg-purple-500/10',
     label: 'Medication' 
   },
   vaccination: { 
-    icon: <HeartPulse size={20} />, 
-    color: 'border-red-500 bg-red-500/10 text-red-500', 
+    icon: <HeartPulse size={18} />, 
+    color: 'text-rose-500 border-rose-500', 
+    bgColor: 'bg-rose-500/10',
     label: 'Vaccination' 
   },
   test: { 
-    icon: <Activity size={20} />, 
-    color: 'border-yellow-500 bg-yellow-500/10 text-yellow-500', 
+    icon: <Activity size={18} />, 
+    color: 'text-amber-500 border-amber-500', 
+    bgColor: 'bg-amber-500/10',
     label: 'Medical Test' 
   },
 };
@@ -240,7 +249,7 @@ const MedicalHistory: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<MedicalEvent | null>(null);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState<boolean>(false);
-  const [view, setView] = useState<'timeline' | 'metrics'>('timeline');
+  const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
 
   // Apply filters and search
   const filteredEvents = events.filter(event => {
@@ -280,17 +289,25 @@ const MedicalHistory: React.FC = () => {
   // Handle event selection
   const handleEventClick = (event: MedicalEvent) => {
     setSelectedEvent(event);
+    setIsDetailsOpen(true);
+  };
+
+  // Close the details panel
+  const closeDetails = () => {
+    setIsDetailsOpen(false);
+    // Wait for the animation to finish before deselecting the event
+    setTimeout(() => setSelectedEvent(null), 300);
   };
 
   // Get trend direction icon
   const getTrendIcon = (trend?: 'up' | 'down' | 'stable') => {
     switch (trend) {
       case 'up':
-        return <ChevronUp className="text-red-500" size={16} />;
+        return <ChevronUp className="text-rose-500" size={16} />;
       case 'down':
-        return <ChevronDown className="text-green-500" size={16} />;
+        return <ChevronDown className="text-emerald-500" size={16} />;
       case 'stable':
-        return <ChevronRight className="text-yellow-500" size={16} />;
+        return <ChevronRight className="text-amber-500" size={16} />;
       default:
         return null;
     }
@@ -310,294 +327,267 @@ const MedicalHistory: React.FC = () => {
   });
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4">
-      <h1 className="text-2xl font-bold text-white mb-6 flex items-center">
-        <Calendar className="mr-2 h-6 w-6 text-blue-400" /> 
-        Medical History
-      </h1>
+    <div className="w-full max-w-7xl mx-auto px-4 pb-12">
+      <div className="mb-8 flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
+          <Calendar className="mr-3 h-7 w-7 text-blue-400" /> 
+          Medical History
+        </h1>
+        
+        {/* Add Record Button */}
+        <button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center text-white transition-all duration-200">
+          <Plus size={20} className="mr-2" />
+          Add Record
+        </button>
+      </div>
+      <p className="text-gray-400 max-w-3xl mb-8">
+        Access complete medical timeline with consultations, reports, medications, and more in one central place.
+      </p>
 
       {/* Search and Filter Bar */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <div className="relative flex-grow max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+      <div className="flex flex-wrap gap-3 mb-8 bg-gray-900/80 p-4 rounded-xl backdrop-blur shadow-lg">
+        <div className="relative flex-grow">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           <input 
             type="text" 
-            placeholder="Search medical records..." 
+            placeholder="Search your medical records..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-900/60 border border-gray-800 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-200 text-sm"
+            className="w-full pl-11 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
           />
         </div>
 
-        <div className="relative">
-          <button 
-            className="bg-gray-800 py-2 px-4 rounded-lg flex items-center justify-between w-full sm:w-auto"
-            onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-          >
-            <div className="flex items-center">
-              <Filter className="mr-2" size={18} />
-              <span>Filter</span>
-            </div>
-            <ChevronDown size={18} className={`ml-2 transition-transform ${isFilterDropdownOpen ? 'rotate-180' : ''}`} />
-          </button>
+        {/* Filter Tags */}
+        <div className="flex gap-2 flex-wrap items-center">
+          <span className="text-gray-400 hidden md:inline">Filter by:</span>
+          {Object.entries(eventTypeConfig).map(([type, config]) => (
+            <button
+              key={type}
+              onClick={() => toggleFilter(type)}
+              className={`px-3 py-2 rounded-lg flex items-center text-sm border transition-all ${
+                activeFilters.includes(type)
+                  ? `${config.color} ${config.bgColor} border-current`
+                  : 'text-gray-400 border-gray-700 hover:border-gray-500'
+              }`}
+            >
+              <span className="mr-2">{config.icon}</span>
+              {config.label}
+            </button>
+          ))}
           
-          {isFilterDropdownOpen && (
-            <div className="absolute z-10 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg p-4 right-0">
-              <h3 className="text-sm font-medium mb-2">Filter by type</h3>
-              <div className="space-y-2 mb-4">
-                {Object.entries(eventTypeConfig).map(([type, config]) => (
-                  <div key={type} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={`filter-${type}`}
-                      className="mr-2"
-                      checked={activeFilters.includes(type)}
-                      onChange={() => toggleFilter(type)}
-                    />
-                    <label htmlFor={`filter-${type}`} className="flex items-center">
-                      <span className={`w-2 h-2 rounded-full ${config.color.split(' ')[0]} mr-2`}></span>
-                      {config.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
-              <button 
-                className="w-full bg-gray-700 hover:bg-gray-600 py-1 px-3 rounded text-sm"
-                onClick={clearFilters}
-              >
-                Clear All Filters
-              </button>
-            </div>
+          {activeFilters.length > 0 && (
+            <button
+              onClick={clearFilters}
+              className="px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800"
+            >
+              <X size={16} />
+            </button>
           )}
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Timeline View */}
-        {view === 'timeline' && (
-          <>
-            {/* Medical Events Timeline */}
-            <div className="lg:col-span-2 bg-gray-900 rounded-xl overflow-hidden shadow-lg">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold mb-6 flex items-center">
-                  <FileText className="mr-3 text-blue-400" size={24} />
-                  Medical Timeline
-                </h2>
-                
-                {Object.keys(eventsByMonth).length > 0 ? (
-                  <div className="space-y-8">
-                    {Object.entries(eventsByMonth).map(([monthYear, monthEvents]) => (
-                      <div key={monthYear} className="relative">
-                        <div className="flex items-center mb-4">
-                          <CalendarIcon className="text-blue-400 mr-2" size={18} />
-                          <h3 className="text-lg font-medium">{monthYear}</h3>
-                        </div>
-                        
-                        <div className="space-y-4 ml-2 pl-6 border-l-2 border-gray-700">
-                          {monthEvents.map((event) => (
-                            <div 
-                              key={event.id} 
-                              className={`relative pl-6 pb-2 cursor-pointer ${selectedEvent?.id === event.id ? 'bg-gray-800 -ml-6 pl-12 pr-6 py-2 rounded-lg' : ''}`}
-                              onClick={() => handleEventClick(event)}
-                            >
-                              <div className={`absolute left-[-9px] w-4 h-4 rounded-full ${eventTypeConfig[event.type].color.split(' ')[0]} border-2 border-gray-900`}></div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                  <h4 className="font-medium">{event.title}</h4>
-                                  <div className="flex items-center text-sm text-gray-400 mt-1">
-                                    <div className={`flex items-center mr-3 ${eventTypeConfig[event.type].color}`}>
-                                      {eventTypeConfig[event.type].icon}
-                                      <span className="ml-1">{eventTypeConfig[event.type].label}</span>
-                                    </div>
-                                    <div className="flex items-center">
-                                      <User size={14} className="mr-1" /> 
-                                      {event.provider}
-                                    </div>
-                                  </div>
+
+      {/* Timeline with Details Sidebar */}
+      <div className={`grid grid-cols-1 ${isDetailsOpen ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} gap-8 relative`}>
+        {/* Medical Events Timeline */}
+        <div className={`${isDetailsOpen ? 'lg:col-span-2' : 'lg:col-span-1'} bg-gray-900 rounded-xl overflow-hidden shadow-xl border border-gray-800`}>
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <CalendarIcon className="mr-3 text-blue-400" size={22} />
+              Medical Timeline
+            </h2>
+            
+            {Object.keys(eventsByMonth).length > 0 ? (
+              <div className="space-y-10">
+                {Object.entries(eventsByMonth).map(([monthYear, monthEvents]) => (
+                  <div key={monthYear} className="relative">
+                    <div className="flex items-center mb-5">
+                      <div className="bg-blue-600/20 p-2 rounded-lg mr-3">
+                        <CalendarIcon className="text-blue-400" size={18} />
+                      </div>
+                      <h3 className="text-lg font-medium text-blue-50">{monthYear}</h3>
+                    </div>
+                    
+                    <div className="space-y-4 ml-2 pl-8 border-l-2 border-gray-700">
+                      {monthEvents.map((event) => (
+                        <div 
+                          key={event.id} 
+                          className={`relative pl-6 pb-2 cursor-pointer transition-all duration-200 ${
+                            selectedEvent?.id === event.id 
+                              ? 'bg-gray-800 -ml-6 pl-12 pr-6 py-4 rounded-lg border-l-4 border-blue-500 shadow-md' 
+                              : 'hover:bg-gray-800/40 hover:-ml-4 hover:pl-10 hover:rounded-lg'
+                          }`}
+                          onClick={() => handleEventClick(event)}
+                        >
+                          <div className={`absolute left-[-16px] w-8 h-8 rounded-full flex items-center justify-center ${eventTypeConfig[event.type].bgColor} ${eventTypeConfig[event.type].color} border border-current z-10`}>
+                            {eventTypeConfig[event.type].icon}
+                          </div>
+                          
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div>
+                              <h4 className="font-medium text-white text-lg">{event.title}</h4>
+                              <div className="flex flex-wrap items-center text-sm text-gray-400 mt-1 gap-3">
+                                <div className={`flex items-center ${eventTypeConfig[event.type].color}`}>
+                                  {eventTypeConfig[event.type].icon}
+                                  <span className="ml-1">{eventTypeConfig[event.type].label}</span>
                                 </div>
-                                <div className="flex items-center mt-2 sm:mt-0 text-sm text-gray-400">
+                                <div className="flex items-center">
+                                  <User size={14} className="mr-1" /> 
+                                  {event.provider}
+                                </div>
+                                <div className="flex items-center">
                                   <Clock size={14} className="mr-1" />
-                                  <span>{formatDate(event.date)} at {formatTime(event.date)}</span>
+                                  <span>{formatTime(event.date)}</span>
                                 </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-400">
-                    <FileText size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>No medical events found with the current filters.</p>
-                    <button 
-                      className="mt-4 text-blue-400 hover:text-blue-300"
-                      onClick={clearFilters}
-                    >
-                      Clear all filters
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Event Details */}
-            <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg lg:col-span-1">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold mb-6">Event Details</h2>
-                
-                {selectedEvent ? (
-                  <div>
-                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${eventTypeConfig[selectedEvent.type].color} mb-4`}>
-                      {eventTypeConfig[selectedEvent.type].icon}
-                      <span className="ml-2">{eventTypeConfig[selectedEvent.type].label}</span>
-                    </div>
-                    
-                    <h3 className="text-lg font-medium mb-2">{selectedEvent.title}</h3>
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-center text-gray-400">
-                        <Calendar className="mr-2" size={16} />
-                        <span>{formatDate(selectedEvent.date)} at {formatTime(selectedEvent.date)}</span>
-                      </div>
-                      
-                      <div className="flex items-center text-gray-400">
-                        <User className="mr-2" size={16} />
-                        <span>{selectedEvent.provider}</span>
-                      </div>
-                      
-                      <div className="pt-2 border-t border-gray-700">
-                        <h4 className="font-medium mb-2">Description</h4>
-                        <p className="text-gray-300">{selectedEvent.description}</p>
-                      </div>
-                      
-                      {selectedEvent.metrics && Object.keys(selectedEvent.metrics).length > 0 && (
-                        <div className="pt-4 border-t border-gray-700">
-                          <h4 className="font-medium mb-3">Health Metrics</h4>
-                          <div className="space-y-3">
-                            {Object.entries(selectedEvent.metrics).map(([name, data]) => (
-                              <div key={name} className="bg-gray-800 p-3 rounded-lg">
-                                <div className="flex justify-between">
-                                  <span className="text-gray-300">{name}</span>
-                                  <div className="flex items-center">
-                                    <span className="font-medium">{data.value} {data.unit}</span>
-                                    {data.trend && (
-                                      <span className="ml-2">
-                                        {getTrendIcon(data.trend)}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                {data.previousValue && (
-                                  <div className="mt-1 text-sm text-gray-400">
-                                    Previous: {data.previousValue} {data.unit}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
+                            
+                            <div className="flex items-center gap-2">
+                              {event.attachments && (
+                                <span className="text-xs bg-gray-700 px-2 py-1 rounded flex items-center">
+                                  <FileText size={12} className="mr-1" />
+                                  {event.attachments.length}
+                                </span>
+                              )}
+                              <button className="text-blue-400 hover:text-blue-300 flex items-center text-sm">
+                                <Eye size={16} className="mr-1" />
+                                View
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      )}
-                      
-                      {selectedEvent.attachments && selectedEvent.attachments.length > 0 && (
-                        <div className="pt-4 border-t border-gray-700">
-                          <h4 className="font-medium mb-3">Attachments</h4>
-                          <div className="space-y-2">
-                            {selectedEvent.attachments.map(attachment => (
-                              <div key={attachment.id} className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
-                                <div className="flex items-center">
-                                  <FileText className="mr-2 text-blue-400" size={16} />
-                                  <div>
-                                    <div>{attachment.name}</div>
-                                    <div className="text-sm text-gray-400">{attachment.type} · {attachment.size}</div>
-                                  </div>
-                                </div>
-                                <div className="flex">
-                                  <button className="p-2 hover:bg-gray-700 rounded-full">
-                                    <Download size={16} />
-                                  </button>
-                                  <button className="p-2 hover:bg-gray-700 rounded-full">
-                                    <Share2 size={16} />
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      ))}
                     </div>
                   </div>
-                ) : (
-                  <div className="text-center py-16 text-gray-400">
-                    <FileText size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>Select an event from the timeline to view details</p>
-                  </div>
-                )}
+                ))}
               </div>
-            </div>
-          </>
-        )}
+            ) : (
+              <div className="text-center py-16 bg-gray-800/50 rounded-xl border border-gray-700">
+                <FileText size={48} className="mx-auto mb-4 text-gray-600" />
+                <p className="text-gray-400 mb-2">No medical events found with the current filters</p>
+                <button 
+                  className="text-blue-400 hover:text-blue-300 mt-2"
+                  onClick={clearFilters}
+                >
+                  Clear all filters
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
         
-        {/* Health Metrics View */}
-        {view === 'metrics' && (
-          <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {metrics.map(metric => (
-              <div key={metric.id} className="bg-gray-900 rounded-xl overflow-hidden shadow-lg p-6">
-                <h3 className="text-lg font-medium mb-3">{metric.name}</h3>
-                <div className="h-40 bg-gray-800 rounded-lg p-3 mb-4">
-                  {/* This is a placeholder for a chart - in a real application you would use Recharts or similar */}
-                  <div className="flex items-end justify-around h-28">
-                    {metric.values.map((value, index) => {
-                      const height = `${(value.value / Math.max(...metric.values.map(v => v.value))) * 100}%`;
-                      const isInRange = !metric.normalRange || (value.value >= metric.normalRange.min && value.value <= metric.normalRange.max);
-                      
-                      return (
-                        <div key={index} className="flex flex-col items-center">
-                          <div 
-                            className={`w-6 rounded-t-sm ${isInRange ? 'bg-blue-500' : 'bg-red-500'}`} 
-                            style={{ height }}
-                          ></div>
-                          <div className="mt-1 text-xs text-gray-400">
-                            {new Date(value.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center mb-3">
-                  <div className="text-gray-400">Current Value</div>
-                  <div className="font-medium text-lg">
-                    {metric.values[metric.values.length - 1].value} {metric.unit}
-                  </div>
-                </div>
-                
-                {metric.normalRange && (
-                  <div className="flex justify-between text-sm text-gray-400">
-                    <div>Normal Range</div>
-                    <div>{metric.normalRange.min} - {metric.normalRange.max} {metric.unit}</div>
-                  </div>
-                )}
-                
-                <div className="mt-4">
-                  <button className="w-full bg-gray-800 hover:bg-gray-700 py-2 rounded-lg">
-                    View Full History
-                  </button>
-                </div>
-              </div>
-            ))}
-            
-            <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg p-6 flex flex-col justify-center items-center text-center">
-              <Activity size={40} className="text-blue-400 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Track a New Metric</h3>
-              <p className="text-gray-400 mb-4">Add a new health metric to start tracking your progress</p>
-              <button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg">
-                Add New Metric
+        {/* Event Details Sidebar */}
+        <div 
+          className={`bg-gray-900 rounded-xl overflow-hidden shadow-xl border border-gray-800 h-fit lg:sticky lg:top-4 transition-all duration-300 transform ${
+            isDetailsOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 lg:absolute lg:right-0'
+          }`}
+        >
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Event Details</h2>
+              <button 
+                onClick={closeDetails}
+                className="p-2 hover:bg-gray-800 rounded-full"
+              >
+                <X size={20} />
               </button>
             </div>
+            
+            {selectedEvent && (
+              <div className="space-y-6">
+                <div className={`px-4 py-3 rounded-lg ${eventTypeConfig[selectedEvent.type].bgColor} border ${eventTypeConfig[selectedEvent.type].color}`}>
+                  <div className="flex items-center">
+                    <div className="mr-3">
+                      {eventTypeConfig[selectedEvent.type].icon}
+                    </div>
+                    <div>
+                      <div className={`text-sm ${eventTypeConfig[selectedEvent.type].color}`}>
+                        {eventTypeConfig[selectedEvent.type].label}
+                      </div>
+                      <h3 className="text-lg font-medium text-white">{selectedEvent.title}</h3>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-800/50 rounded-lg p-4 space-y-3">
+                  <div className="flex items-center text-gray-300">
+                    <Calendar className="mr-2 text-gray-400" size={16} />
+                    <span>{formatDate(selectedEvent.date)} at {formatTime(selectedEvent.date)}</span>
+                  </div>
+                  
+                  <div className="flex items-center text-gray-300">
+                    <User className="mr-2 text-gray-400" size={16} />
+                    <span>{selectedEvent.provider}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-1">
+                  <h4 className="font-medium text-gray-300">Description</h4>
+                  <p className="text-gray-400 bg-gray-800/50 p-4 rounded-lg">{selectedEvent.description}</p>
+                </div>
+                
+                {selectedEvent.metrics && Object.keys(selectedEvent.metrics).length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-300">Health Metrics</h4>
+                    <div className="grid gap-3">
+                      {Object.entries(selectedEvent.metrics).map(([name, data]) => (
+                        <div key={name} className="bg-gray-800/70 p-4 rounded-lg">
+                          <div className="flex justify-between mb-1">
+                            <span className="text-gray-300">{name}</span>
+                            <div className="flex items-center">
+                              <span className="font-medium text-white">{data.value} {data.unit}</span>
+                              {data.trend && (
+                                <span className="ml-2">
+                                  {getTrendIcon(data.trend)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          {data.previousValue && (
+                            <div className="text-sm text-gray-500">
+                              Previous: {data.previousValue} {data.unit}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {selectedEvent.attachments && selectedEvent.attachments.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-300">Attachments</h4>
+                    <div className="grid gap-2">
+                      {selectedEvent.attachments.map(attachment => (
+                        <div key={attachment.id} className="flex items-center justify-between bg-gray-800/70 p-3 rounded-lg hover:bg-gray-800 transition-colors">
+                          <div className="flex items-center">
+                            <div className="bg-blue-600/20 p-2 rounded mr-3">
+                              <FileText className="text-blue-400" size={16} />
+                            </div>
+                            <div>
+                              <div className="text-gray-200">{attachment.name}</div>
+                              <div className="text-xs text-gray-500">{attachment.type} · {attachment.size}</div>
+                            </div>
+                          </div>
+                          <div className="flex">
+                            <button className="p-2 hover:bg-gray-700 rounded-full" title="Download">
+                              <Download size={16} />
+                            </button>
+                            <button className="p-2 hover:bg-gray-700 rounded-full" title="Share">
+                              <Share2 size={16} />
+                            </button>
+                            <button className="p-2 hover:bg-gray-700 rounded-full" title="Open">
+                              <ExternalLink size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

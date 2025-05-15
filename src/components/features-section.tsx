@@ -31,13 +31,7 @@ export const FeaturesSection: React.FC = () => {
       path: '/ai-diagnosis',
       isLink: true
     },
-    {
-      icon: <Video className="h-6 w-6" />,
-      title: t('telemedicine'),
-      description: t('telemedicineLong'),
-      path: '#',
-      isLink: true
-    },
+    
     {
       icon: <ClipboardList className="h-6 w-6" />,
       title: t('medicalHistory'),
@@ -45,13 +39,7 @@ export const FeaturesSection: React.FC = () => {
       path: '/medical-history',
       isLink: true
     },
-    {
-      icon: <Bell className="h-6 w-6" />,
-      title: t('healthReminders'),
-      description: t('healthRemindersLong'),
-      path: '#',
-      isLink: true
-    }
+    
   ];
 
   return (
@@ -66,7 +54,7 @@ export const FeaturesSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {features.map((feature, index) => (
             <Link key={index} to={user ? feature.path : '/auth'} className="block h-full cursor-pointer">
               <FeatureCard
