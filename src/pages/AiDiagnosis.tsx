@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { 
   Activity, 
   AlertCircle, 
@@ -81,6 +81,15 @@ interface MedicalHistory {
   saved: boolean;
 }
 
+// Add this context definition before the AiDiagnosis component
+interface AiDiagnosisContextType {
+  isFetchingHistory: boolean;
+  historyError: string | null;
+  fetchUserMedicalHistory: () => void;
+}
+
+const AiDiagnosisContext = createContext<AiDiagnosisContextType | undefined>(undefined);
+
 const AiDiagnosis: React.FC = () => {
   // Main wizard state
   const [step, setStep] = useState<number>(1);
@@ -106,6 +115,8 @@ const AiDiagnosis: React.FC = () => {
   const [activeResultTab, setActiveResultTab] = useState<string>('overview');
   const [showGeminiDetails, setShowGeminiDetails] = useState<boolean>(false);
   const [showHistoryPanel, setShowHistoryPanel] = useState<boolean>(false);
+  const [isFetchingHistory, setIsFetchingHistory] = useState<boolean>(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   
   // Results
   const [diagnosisResults, setDiagnosisResults] = useState<DiagnosisResult[]>([]);
@@ -585,6 +596,9 @@ const AiDiagnosis: React.FC = () => {
     setDiagnosisResults([]);
     setGeminiResponse(null);
     setActiveResultTab('overview');
+    setError(null);
+    setSaveSuccess(null);
+    setSaveError(null);
   };
 
   // Mock diagnosis based on symptoms
@@ -765,19 +779,34 @@ const AiDiagnosis: React.FC = () => {
             return symptom ? symptom.name : id;
           });
           
-          // Save to Firebase silently in the background
-          saveDiagnosisReport(
+          // Set saving indicator
+          setIsSavingToFirebase(true);
+          setSaveError(null);
+          
+          // Save to Firebase
+          await saveDiagnosisReport(
             user.id,
             geminiResponse,
             symptomNames
-          ).then(() => {
-            console.log('Diagnosis automatically saved to user profile');
-          }).catch(err => {
-            console.error('Error auto-saving diagnosis:', err);
-          });
+          );
+          
+          setSaveSuccess(true);
+          console.log('Diagnosis automatically saved to user profile');
+          
+          // Clear success message after a few seconds
+          setTimeout(() => {
+            setSaveSuccess(null);
+          }, 3000);
+          
+          // Refresh the medical history to include the new entry
+          fetchUserMedicalHistory();
+          
         } catch (error) {
-          console.error('Error preparing diagnosis for auto-save:', error);
-          // Don't throw here - we still want to show the results even if the save fails
+          console.error('Error saving diagnosis to Firebase:', error);
+          setSaveError(error instanceof Error ? error.message : String(error));
+          setSaveSuccess(false);
+        } finally {
+          setIsSavingToFirebase(false);
         }
       }
     } catch (error) {
@@ -1316,25 +1345,8 @@ const AiDiagnosis: React.FC = () => {
               </div>
             </div>
             
-            {/* Save/Export options */}
+            {/* AI Details toggle */}
             <div className="mt-6 flex items-center space-x-4">
-              <button 
-                onClick={() => saveDiagnosis()}
-                className={`text-blue-400 hover:text-blue-300 flex items-center text-sm ${isSavingToFirebase ? 'opacity-50 cursor-wait' : ''}`}
-                disabled={isSavingToFirebase}
-              >
-                {isSavingToFirebase ? (
-                  <>
-                    <div className="animate-spin h-4 w-4 mr-1 border-t-2 border-blue-500 border-solid rounded-full"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-1" />
-                    {isAuthenticated ? 'Save to Profile' : 'Save to History'}
-                  </>
-                )}
-              </button>
               <button 
                 className="text-blue-400 hover:text-blue-300 flex items-center text-sm"
                 onClick={() => setShowGeminiDetails(!showGeminiDetails)}
@@ -1343,7 +1355,13 @@ const AiDiagnosis: React.FC = () => {
                 {showGeminiDetails ? 'Hide AI Details' : 'Show AI Details'}
               </button>
               
-              {/* Show success or error messages */}
+              {/* Auto-save status indicators */}
+              {isSavingToFirebase && (
+                <div className="flex items-center text-gray-400 text-xs">
+                  <div className="animate-spin h-3 w-3 mr-1 border-t-2 border-blue-500 border-solid rounded-full"></div>
+                  Saving to profile...
+                </div>
+              )}
               {saveSuccess === true && (
                 <span className="text-green-400 text-xs">Saved to profile!</span>
               )}
@@ -1922,35 +1940,47 @@ const AiDiagnosis: React.FC = () => {
     );
   };
 
-  // Add a function to fetch user's medical history from Firestore
+  // Fetch user's medical history from Firestore
   const fetchUserMedicalHistory = async () => {
     if (!isAuthenticated || !user) return;
     
     try {
+      setIsFetchingHistory(true);
       const { getUserMedicalHistory } = await import('@/lib/medical-history-service');
       const history = await getUserMedicalHistory(user.id);
+      
+      console.log('Fetched medical history:', history.length, 'records');
       
       // Convert Firestore records to the local MedicalHistory format
       const convertedHistory: MedicalHistory[] = history.map(record => ({
         id: record.id || Date.now().toString(),
         date: typeof record.date === 'string' ? record.date : record.date.toISOString(),
-        symptoms: record.symptoms,
-        diagnosis: record.diagnosis,
+        symptoms: record.symptoms || [],
+        diagnosis: record.diagnosis || "Unknown condition",
         saved: true
       }));
+      
+      // Sort by date (newest first)
+      convertedHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       
       // Update local state with fetched history
       setPastDiagnoses(convertedHistory);
     } catch (error) {
       console.error('Error fetching medical history:', error);
-      // Don't set an error state as this is a background operation
+      setHistoryError('Failed to load medical history. Please try again later.');
+    } finally {
+      setIsFetchingHistory(false);
     }
   };
 
-  // Add a useEffect to load user medical history when component mounts or user changes
+  // Load user medical history when component mounts or user changes
   useEffect(() => {
     if (isAuthenticated && user) {
+      console.log('User authenticated, fetching medical history...');
       fetchUserMedicalHistory();
+    } else {
+      // Clear history when user logs out
+      setPastDiagnoses([]);
     }
   }, [isAuthenticated, user]);
 
@@ -2074,20 +2104,24 @@ const AiDiagnosis: React.FC = () => {
               AI Diagnosis
             </h1>
             
-            {isAuthenticated && (
-              <button 
-                onClick={() => setShowHistoryPanel(!showHistoryPanel)}
-                className="bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded-md flex items-center transition-colors"
-                title="View Medical History"
-              >
-                <History className="h-4 w-4 mr-2" />
-                Medical History
-              </button>
-            )}
+            <button 
+              onClick={() => setShowHistoryPanel(!showHistoryPanel)}
+              className={`${isAuthenticated ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-700'} text-white py-2 px-4 rounded-md flex items-center transition-colors`}
+              title="View Medical History"
+              disabled={!isAuthenticated}
+            >
+              <History className="h-4 w-4 mr-2" />
+              {isAuthenticated ? 'Medical History' : 'Sign in to view history'}
+            </button>
           </div>
           <p className="text-gray-400 max-w-3xl">
             Receive comprehensive health assessments with advanced Gemini AI analysis, probability indicators, 
             suggested precautions, and recommended treatments for your symptoms.
+            {!isAuthenticated && (
+              <span className="text-blue-400 ml-1">
+                Sign in to save your diagnosis history automatically.
+              </span>
+            )}
           </p>
         </div>
         
@@ -2227,7 +2261,7 @@ const AiDiagnosis: React.FC = () => {
       </div>
       
       {/* Medical History Panel */}
-      {showHistoryPanel && (
+      {showHistoryPanel && isAuthenticated && (
         <MedicalHistoryPanel 
           isVisible={showHistoryPanel}
           onClose={() => setShowHistoryPanel(false)}
@@ -2235,6 +2269,24 @@ const AiDiagnosis: React.FC = () => {
           onSelectRecord={(record) => {
             setSelectedDiagnosis(record);
             setShowHistoryPanel(false);
+          }}
+          isFetchingHistory={isFetchingHistory}
+          historyError={historyError}
+          onRefresh={fetchUserMedicalHistory}
+          onCreateTestRecord={async () => {
+            if (!user) return;
+            try {
+              setIsFetchingHistory(true);
+              const { createTestMedicalHistoryRecord } = await import('@/lib/medical-history-service');
+              await createTestMedicalHistoryRecord(user.id);
+              // Refresh the history after creating the test record
+              fetchUserMedicalHistory();
+            } catch (error) {
+              console.error('Error creating test record:', error);
+              setHistoryError('Failed to create test record. See console for details.');
+            } finally {
+              setIsFetchingHistory(false);
+            }
           }}
         />
       )}
@@ -2250,8 +2302,15 @@ const MedicalHistoryPanel: React.FC<{
   onClose: () => void;
   history: MedicalHistory[];
   onSelectRecord: (record: MedicalHistory) => void;
-}> = ({ isVisible, onClose, history, onSelectRecord }) => {
+  isFetchingHistory: boolean;
+  historyError: string | null;
+  onRefresh: () => void;
+  onCreateTestRecord: () => Promise<void>;
+}> = ({ isVisible, onClose, history, onSelectRecord, isFetchingHistory, historyError, onRefresh, onCreateTestRecord }) => {
   if (!isVisible) return null;
+  
+  // Debug information for the panel
+  const { user } = useAuth();
   
   return (
     <div className="fixed right-0 top-0 h-screen w-80 bg-gray-900 border-l border-gray-800 shadow-xl z-50 transition-all transform">
@@ -2260,22 +2319,72 @@ const MedicalHistoryPanel: React.FC<{
           <History className="h-5 w-5 text-blue-500 mr-2" />
           Medical History
         </h2>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-white p-1"
-        >
-          ×
-        </button>
+        <div className="flex items-center">
+          <button
+            onClick={onRefresh}
+            className="text-gray-400 hover:text-white p-1 mr-2"
+            title="Refresh history"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </button>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white p-1"
+            title="Close"
+          >
+            ×
+          </button>
+        </div>
       </div>
       
       <div className="p-4 overflow-y-auto max-h-[calc(100vh-5rem)]">
-        {history.length === 0 ? (
+        {/* User info for debugging */}
+        {user && (
+          <div className="mb-4 text-xs text-gray-500 border-b border-gray-800 pb-2">
+            User ID: {user.id} <br />
+            Name: {user.name}
+            <button 
+              onClick={onCreateTestRecord}
+              className="mt-2 text-xs text-blue-400 p-1 border border-blue-800 rounded block w-full"
+            >
+              Create Test Record
+            </button>
+          </div>
+        )}
+      
+        {/* Loading state */}
+        {isFetchingHistory && (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            <span className="ml-3 text-gray-400">Loading history...</span>
+          </div>
+        )}
+        
+        {/* Error state */}
+        {historyError && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
+            <p className="text-red-300 text-sm">{historyError}</p>
+            <button 
+              onClick={onRefresh}
+              className="mt-2 text-blue-400 text-sm flex items-center"
+            >
+              <RefreshCw className="h-3 w-3 mr-1" />
+              Try again
+            </button>
+          </div>
+        )}
+        
+        {/* Empty state */}
+        {!isFetchingHistory && !historyError && history.length === 0 && (
           <div className="text-center py-8 text-gray-400">
             <FilePlus className="h-10 w-10 mx-auto mb-3 text-gray-500" />
             <p>No diagnosis history found.</p>
             <p className="text-sm mt-2">Complete a diagnosis to save it here.</p>
           </div>
-        ) : (
+        )}
+        
+        {/* History records */}
+        {!isFetchingHistory && history.length > 0 && (
           <div className="space-y-3">
             {history.map((record) => (
               <div 

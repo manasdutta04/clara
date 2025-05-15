@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read and write their own medical history records
+    match /medicalHistory/{recordId} {
+      // Allow reading any record where userId matches the authenticated user
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Allow updating existing records the user owns
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Allow creating new records where the user correctly sets their userId
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Default deny rule for everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

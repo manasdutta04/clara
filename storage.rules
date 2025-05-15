@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow authenticated users to read and write to their own files
+    match /diagnosis-reports/{userId_timestamp} {
+      // Extracts the user ID from the file path (format: userId_timestamp.json)
+      function extractUserId() {
+        return userId_timestamp.split('_')[0];
+      }
+      
+      // Allow the file owner to read/write
+      allow read, write: if request.auth != null && extractUserId() == request.auth.uid;
+      
+      // Allow admin access from the backend
+      allow read, write: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Legacy path support - same rules
+    match /users/{userId}/diagnosis-reports/{filename} {
+      allow read, write: if request.auth != null && userId == request.auth.uid;
+    }
+    
+    // Always deny by default for security
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
