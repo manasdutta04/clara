@@ -1,34 +1,21 @@
 import React, { useState } from "react";
 import { FeatureCard } from "./magicui/feature-card";
-import { MessageCircle, FileText, Stethoscope, Video, ClipboardList, Bell } from "lucide-react";
+import { MapPin, FileText, Stethoscope, Video, ClipboardList, Bell } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { Link } from "react-router-dom";
-import ChatbotPopup from "./ChatbotPopup";
 import { useAuth } from "@/lib/auth-context";
 
 export const FeaturesSection: React.FC = () => {
   const { t } = useLanguage();
   const { user } = useAuth();
-  const [isChatOpen, setIsChatOpen] = useState(false);
-
-  const toggleChat = () => {
-    setIsChatOpen(!isChatOpen);
-  };
   
   const features = [
     {
-      icon: <MessageCircle className="h-6 w-6" />,
-      title: t('mentalHealthChatbot'),
-      description: t('mentalHealthChatbotLong'),
-      onClick: () => {
-        if (user) {
-          toggleChat();
-        } else {
-          // If not logged in, redirect to auth page
-          window.location.href = '/auth';
-        }
-      },
-      isLink: false
+      icon: <MapPin className="h-6 w-6" />,
+      title: 'Nearby Health Services',
+      description: 'Find healthcare providers nearby, from hospitals to specialists, with ratings and details to help you make informed decisions.',
+      path: '/nearby-health-services',
+      isLink: true
     },
     {
       icon: <FileText className="h-6 w-6" />,
@@ -81,31 +68,17 @@ export const FeaturesSection: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((feature, index) => (
-            feature.isLink ? (
-              <Link key={index} to={feature.path} className="block h-full cursor-pointer">
-                <FeatureCard
-                  icon={feature.icon}
-                  title={feature.title}
-                  description={feature.description}
-                  className="h-full"
-                />
-              </Link>
-            ) : (
-              <div key={index} onClick={feature.onClick} className="cursor-pointer">
-                <FeatureCard
-                  icon={feature.icon}
-                  title={feature.title}
-                  description={feature.description}
-                  className="h-full"
-                />
-              </div>
-            )
+            <Link key={index} to={user ? feature.path : '/auth'} className="block h-full cursor-pointer">
+              <FeatureCard
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                className="h-full"
+              />
+            </Link>
           ))}
         </div>
       </div>
-
-      {/* Chatbot Popup */}
-      <ChatbotPopup isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </section>
   );
 }; 

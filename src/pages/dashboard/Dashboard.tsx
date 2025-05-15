@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/language-context';
 import { Link } from 'react-router-dom';
-import { Activity, FileText, Brain, MessageSquare } from 'lucide-react';
+import { Activity, FileText, Brain, MapPin } from 'lucide-react';
 import { MagicCard } from '@/components/magicui/magic-card';
 
 const Dashboard: React.FC = () => {
@@ -32,10 +32,10 @@ const Dashboard: React.FC = () => {
       color: 'from-purple-500/20 to-purple-600/20'
     },
     {
-      title: t('mentalHealthChatbot'),
-      description: t('mentalHealthChatbotDesc'),
-      icon: <MessageSquare className="h-8 w-8 text-pink-400" />,
-      link: '/mental-health-chatbot',
+      title: 'Nearby Health Services',
+      description: 'Find your healthcare facilities nearby',
+      icon: <MapPin className="h-8 w-8 text-pink-400" />,
+      link: '/nearby-health-services',
       color: 'from-pink-500/20 to-pink-600/20'
     }
   ];

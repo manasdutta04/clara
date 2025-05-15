@@ -9,7 +9,7 @@
 - **Mental Health Chatbot**: AI-powered chat interface to help with stress, anxiety, and depression with personalized advice and support.
 - **Lab Report Analysis**: Upload medical reports and scans to get AI-powered explanations in simple language you can understand.
 - **AI Diagnosis**: Receive preliminary assessments with probability indicators, suggested precautions, and recommended OTC medicines.
-- **Telemedicine Integration**: Connect with healthcare professionals through secure video calls and share your medical data seamlessly.
+- **Nearby Health Services**: Connect with nearby healthcare units like Nearby hospitals, Medical stores/pharmacies, Clinics and emergency care.
 - **Medical History**: Access your complete medical timeline with saved consultations, reports, and track health progress over time.
 - **Multilingual Support**: Switch between languages for all features, making healthcare accessible regardless of language preference.
 - **Modern UI/UX**: Fully dark mode, interactive grid backgrounds, animated buttons, and scroll-triggered text reveals.
