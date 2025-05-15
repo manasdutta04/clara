@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Activity, FileText, Brain, MapPin, MessageSquare } from 'lucide-react';
 import { MagicCard } from '@/components/magicui/magic-card';
 import RecentActivities from '@/components/dashboard/RecentActivities';
+import HealthSummary from '@/components/dashboard/HealthSummary';
 import { trackUserActivity, Feature, Action } from '@/lib/user-activity-service';
 
 const Dashboard: React.FC = () => {
@@ -42,7 +43,6 @@ const Dashboard: React.FC = () => {
       link: '/nearby-health-services',
       color: 'from-pink-500/20 to-pink-600/20'
     },
-    
   ];
 
   return (
@@ -89,13 +89,7 @@ const Dashboard: React.FC = () => {
       {/* Health Summary Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-white mb-4">{t('healthSummary')}</h2>
-        <div className="bg-gray-900/60 border border-gray-800/50 rounded-xl p-6">
-          <div className="text-center py-8">
-            <Activity className="h-12 w-12 text-blue-400 mx-auto mb-3" />
-            <p className="text-gray-300 mb-2">{t('healthDataWillAppear')}</p>
-            <p className="text-sm text-gray-500">{t('trackHealthMetrics')}</p>
-          </div>
-        </div>
+        <HealthSummary />
       </div>
 
       {/* Recent Activity Section */}
