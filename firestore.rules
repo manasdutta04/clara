@@ -38,6 +38,15 @@ service cloud.firestore {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
     
+    // Allow authenticated users to read and write their own activity records
+    match /userActivities/{activityId} {
+      // Allow reading any activity where userId matches the authenticated user
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Allow creating new activities where the user correctly sets their userId
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    
     // Default deny rule for everything else
     match /{document=**} {
       allow read, write: if false;

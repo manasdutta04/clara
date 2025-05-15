@@ -11,6 +11,7 @@ import {
   isUserAuthenticated,
   debugAuthStatus
 } from '../lib/lab-report-service';
+import { trackUserActivity, Feature, Action } from '../lib/user-activity-service';
 import type { LabReport, LabReportAnalysisResult } from '../lib/lab-report-service';
 
 interface AnalysisResult extends LabReportAnalysisResult {
@@ -86,6 +87,9 @@ const LabReportAnalysis: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated && user && storageStatus.connected && authChecked) {
       fetchUserReports();
+      
+      // Track activity when user views Lab Report Analysis
+      trackUserActivity(user.id, Feature.LAB_REPORT_ANALYSIS, Action.VIEW);
     }
   }, [isAuthenticated, user, storageStatus.connected, authChecked]);
 

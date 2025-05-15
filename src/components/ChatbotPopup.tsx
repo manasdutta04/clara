@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Smile, Info, ExternalLink, Settings, ChevronDown, ChevronUp, X, MessageSquare, ArrowRight } from 'lucide-react';
 import { callGroqAPI, isGroqConfigured, DEFAULT_MODEL } from '../lib/groq-api';
+import { useAuth } from '../lib/auth-context';
+import { trackUserActivity, Feature, Action } from '../lib/user-activity-service';
 
 interface Message {
   id: string;
@@ -48,6 +50,7 @@ const ChatbotPopup: React.FC<ChatbotPopupProps> = ({ isOpen, onClose }) => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
+  const { user, isAuthenticated } = useAuth();
 
   // Sample suggestion topics
   const suggestionTopics: SuggestionTopic[] = [
@@ -124,6 +127,13 @@ const ChatbotPopup: React.FC<ChatbotPopupProps> = ({ isOpen, onClose }) => {
       setShowSuggestions(true);
     }
   }, [showWelcome, messages.length]);
+
+  // Track chatbot usage when opened
+  useEffect(() => {
+    if (isOpen && isAuthenticated && user) {
+      trackUserActivity(user.id, Feature.CHATBOT, Action.VIEW);
+    }
+  }, [isOpen, isAuthenticated, user]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

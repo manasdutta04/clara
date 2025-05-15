@@ -36,6 +36,11 @@ import {
   createSampleMedicalEvent
 } from '@/lib/medical-events-service';
 import type { MedicalEventRecord } from '@/lib/medical-events-service';
+import { 
+  trackUserActivity, 
+  Feature, 
+  Action 
+} from '@/lib/user-activity-service';
 
 interface MedicalEvent {
   id: string;
@@ -305,6 +310,11 @@ const MedicalHistory: React.FC = () => {
     } else {
       setActiveFilters([...activeFilters, filter]);
     }
+    
+    // Track filter usage
+    if (isAuthenticated && user) {
+      trackUserActivity(user.id, Feature.MEDICAL_HISTORY, Action.FILTER);
+    }
   };
 
   // Clear all filters
@@ -414,6 +424,9 @@ const MedicalHistory: React.FC = () => {
     if (isAuthenticated && user) {
       console.log('User authenticated, fetching medical events...');
       fetchUserMedicalEvents();
+      
+      // Track activity when user views medical history
+      trackUserActivity(user.id, Feature.MEDICAL_HISTORY, Action.VIEW);
     } else if (!authLoading) {
       // Clear events when user logs out
       setEvents([]);
@@ -428,6 +441,10 @@ const MedicalHistory: React.FC = () => {
     try {
       setLoading(true);
       await createSampleMedicalEvent(user.id);
+      
+      // Track sample record creation activity
+      trackUserActivity(user.id, Feature.MEDICAL_HISTORY, Action.CREATE);
+      
       // Refresh the events list
       await fetchUserMedicalEvents();
     } catch (error) {
@@ -460,6 +477,9 @@ const MedicalHistory: React.FC = () => {
       // Save to Firebase
       const recordId = await saveMedicalEvent(user.id, eventToAdd);
       console.log('Saved new medical event with ID:', recordId);
+      
+      // Track the activity of creating a new record
+      trackUserActivity(user.id, Feature.MEDICAL_HISTORY, Action.CREATE);
       
       // Refresh the events list
       await fetchUserMedicalEvents();

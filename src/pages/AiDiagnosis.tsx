@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils';
 import { callGeminiAPI, extractJsonFromText, isGeminiConfigured, listAvailableModels } from '@/lib/gemini-api';
 import { useAuth } from '@/lib/auth-context';
 import { saveDiagnosisReport } from '@/lib/medical-history-service';
+import { trackUserActivity, Feature, Action } from '@/lib/user-activity-service';
 
 interface SymptomOption {
   id: string;
@@ -346,6 +347,13 @@ const AiDiagnosis: React.FC = () => {
   const [isSavingToFirebase, setIsSavingToFirebase] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Track when user visits the AI Diagnosis page
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      trackUserActivity(user.id, Feature.AI_DIAGNOSIS, Action.VIEW);
+    }
+  }, [isAuthenticated, user]);
 
   // Save diagnosis to history (both local state and Firebase if user is authenticated)
   const saveDiagnosis = async () => {
