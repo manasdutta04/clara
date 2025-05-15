@@ -14,6 +14,18 @@ service cloud.firestore {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
     
+    // Allow authenticated users to read and write their own medical events records
+    match /medicalEvents/{recordId} {
+      // Allow reading any record where userId matches the authenticated user
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Allow updating existing records the user owns
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Allow creating new records where the user correctly sets their userId
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    
     // Allow authenticated users to read and write their own lab report records
     match /labReports/{reportId} {
       // Allow reading any report where userId matches the authenticated user
@@ -23,13 +35,6 @@ service cloud.firestore {
       allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       
       // Allow creating new reports where the user correctly sets their userId
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      
-      // For development only - allows any authenticated user to create lab reports
-      // This helps when testing but should be removed in production
-      // If you're getting permission errors, make sure:
-      // 1. The user is properly authenticated with a valid token
-      // 2. The userId in the document matches the authenticated user's ID
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
     
