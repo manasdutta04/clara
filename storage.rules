@@ -19,6 +19,12 @@ service firebase.storage {
       allow read, write: if request.auth != null && request.auth.token.admin == true;
     }
     
+    // Lab reports storage path
+    match /lab-reports/{userId}/{filename} {
+      // Allow the file owner to read/write their own reports
+      allow read, write: if request.auth != null && userId == request.auth.uid;
+    }
+    
     // Legacy path support - same rules
     match /users/{userId}/diagnosis-reports/{filename} {
       allow read, write: if request.auth != null && userId == request.auth.uid;

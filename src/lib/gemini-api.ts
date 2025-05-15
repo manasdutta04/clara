@@ -9,11 +9,11 @@ export const GEMINI_API_KEY =
 // Define multiple model URLs for fallback
 const GEMINI_MODELS = {
   // Primary model - latest Gemini model
-  PRIMARY: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+  PRIMARY: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent",
   // Fallbacks in order of preference
-  FALLBACK_1: "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent", 
-  // Remove the unsupported model and add a newer one
-  FALLBACK_2: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+  FALLBACK_1: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent", 
+  // Final fallback
+  FALLBACK_2: "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent"
 };
 
 // Use the latest stable version of Gemini 1.5 Pro for better capabilities
@@ -27,7 +27,7 @@ export function isGeminiConfigured(): boolean {
 }
 
 // Function to call the Gemini API with fallback support
-export async function callGeminiAPI(prompt: string) {
+export async function callGeminiAPI(prompt: string, imageBase64?: string) {
   // Try primary model first, then fallbacks if needed
   let currentModelUrl = GEMINI_API_URL;
   let lastError = null;
@@ -35,7 +35,7 @@ export async function callGeminiAPI(prompt: string) {
   // Try each model in succession until one works
   for (const modelUrl of [currentModelUrl, GEMINI_MODELS.FALLBACK_1, GEMINI_MODELS.FALLBACK_2]) {
     try {
-      const result = await callSpecificGeminiModel(prompt, modelUrl);
+      const result = await callSpecificGeminiModel(prompt, modelUrl, imageBase64);
       if (result.success) {
         return result;
       }
@@ -55,22 +55,49 @@ export async function callGeminiAPI(prompt: string) {
 }
 
 // Function to call a specific Gemini model
-async function callSpecificGeminiModel(prompt: string, modelUrl: string) {
+async function callSpecificGeminiModel(prompt: string, modelUrl: string, imageBase64?: string) {
   try {
     // Check if API key is available
     if (!GEMINI_API_KEY) {
       throw new Error("Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your environment variables.");
     }
 
+    // Prepare the parts array based on whether we have an image
+    const parts = [];
+    
+    // Add image part if we have one
+    if (imageBase64) {
+      // Make sure the imageBase64 starts with data:image
+      if (imageBase64.startsWith('data:image')) {
+        // Extract the mime type and base64 data
+        const mimeMatch = imageBase64.match(/data:(image\/[^;]+);base64,(.+)/);
+        if (mimeMatch) {
+          const mimeType = mimeMatch[1];
+          const base64Data = mimeMatch[2];
+          
+          // Add the image part
+          parts.push({
+            inlineData: {
+              mimeType,
+              data: base64Data
+            }
+          });
+        } else {
+          console.error("Invalid image data format");
+        }
+      } else {
+        console.error("Image data does not start with 'data:image'");
+      }
+    }
+    
+    // Add text prompt
+    parts.push({ text: prompt });
+    
     // Prepare the API request - updated to match latest Gemini API structure
     const requestBody = {
       contents: [
         {
-          parts: [
-            {
-              text: prompt
-            }
-          ]
+          parts
         }
       ],
       generationConfig: {
@@ -101,6 +128,7 @@ async function callSpecificGeminiModel(prompt: string, modelUrl: string) {
     
     console.log("Calling Gemini API with URL:", modelUrl);
     console.log("Using API key:", GEMINI_API_KEY.substring(0, 5) + "..." + GEMINI_API_KEY.substring(GEMINI_API_KEY.length - 5));
+    console.log("Request includes image:", !!imageBase64);
     
     // Call the Gemini API
     const response = await fetch(`${modelUrl}?key=${GEMINI_API_KEY}`, {

@@ -791,7 +791,7 @@ const AiDiagnosis: React.FC = () => {
           );
           
           setSaveSuccess(true);
-          console.log('Diagnosis automatically saved to user profile');
+            console.log('Diagnosis automatically saved to user profile');
           
           // Clear success message after a few seconds
           setTimeout(() => {
@@ -2104,15 +2104,15 @@ const AiDiagnosis: React.FC = () => {
               AI Diagnosis
             </h1>
             
-            <button 
-              onClick={() => setShowHistoryPanel(!showHistoryPanel)}
+              <button 
+                onClick={() => setShowHistoryPanel(!showHistoryPanel)}
               className={`${isAuthenticated ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-700'} text-white py-2 px-4 rounded-md flex items-center transition-colors`}
-              title="View Medical History"
+                title="View Medical History"
               disabled={!isAuthenticated}
-            >
-              <History className="h-4 w-4 mr-2" />
+              >
+                <History className="h-4 w-4 mr-2" />
               {isAuthenticated ? 'Medical History' : 'Sign in to view history'}
-            </button>
+              </button>
           </div>
           <p className="text-gray-400 max-w-3xl">
             Receive comprehensive health assessments with advanced Gemini AI analysis, probability indicators, 
@@ -2327,13 +2327,13 @@ const MedicalHistoryPanel: React.FC<{
           >
             <RefreshCw className="h-4 w-4" />
           </button>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white p-1"
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-white p-1"
             title="Close"
-          >
-            ×
-          </button>
+        >
+          ×
+        </button>
         </div>
       </div>
       

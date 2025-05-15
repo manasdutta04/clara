@@ -1,8 +1,8 @@
 [
   {
-    "origin": ["http://localhost:5173", "https://clara-io.web.app", "https://clara-io.firebaseapp.com"],
-    "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+    "origin": ["http://localhost:5173", "http://127.0.0.1:5173", "https://clara-io.web.app", "https://clara-io.firebaseapp.com"],
+    "method": ["GET", "PUT", "POST", "DELETE", "HEAD"],
     "maxAgeSeconds": 3600,
-    "responseHeader": ["Content-Type", "Content-Length", "Content-Encoding", "Content-Disposition"]
+    "responseHeader": ["Content-Type", "Authorization", "Content-Length", "User-Agent", "x-goog-resumable"]
   }
 ] 

@@ -15,6 +15,7 @@ const firebaseConfig = {
 };
 
 console.log("Firebase config project ID:", firebaseConfig.projectId);
+console.log("Firebase config storage bucket:", firebaseConfig.storageBucket);
 
 // Initialize Firebase
 let app;
@@ -24,6 +25,16 @@ let firestore;
 let storage;
 
 try {
+  // Check if Firebase config is valid
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.storageBucket) {
+    console.error("Firebase configuration is incomplete. Please check your environment variables.");
+    console.error("Current config:", {
+      apiKey: firebaseConfig.apiKey ? "Set" : "Missing",
+      projectId: firebaseConfig.projectId || "Missing",
+      storageBucket: firebaseConfig.storageBucket || "Missing"
+    });
+  }
+
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   auth.useDeviceLanguage(); // Use the device's preferred language
@@ -41,6 +52,7 @@ try {
   
   // Initialize Storage with cross-origin settings
   storage = getStorage(app);
+  console.log("Firebase Storage initialized with bucket:", app.options.storageBucket);
   
   // Check if we're in development mode (localhost)
   const isLocalhost = window.location.hostname === 'localhost' || 
@@ -50,8 +62,9 @@ try {
   if (isLocalhost && process.env.NODE_ENV === 'development') {
     try {
       // Try to connect to the storage emulator if it's running
-      connectStorageEmulator(storage, 'localhost', 9199);
-      console.log('Connected to Firebase Storage emulator');
+      // Commenting out emulator connection since it's causing connection errors
+      // connectStorageEmulator(storage, 'localhost', 9199);
+      // console.log('Connected to Firebase Storage emulator');
       
       // Connect to Firestore emulator if needed
       // connectFirestoreEmulator(firestore, 'localhost', 8080);
