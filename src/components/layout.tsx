@@ -8,6 +8,7 @@ import Footer from '@/components/footer';
 import { cn } from '@/lib/utils';
 import LanguageSelector from '@/components/language-selector';
 import { RippleButton } from "@/components/magicui/ripple-button";
+import ChatbotButton from '@/components/ChatbotButton';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -97,6 +98,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Chatbot Button */}
+      {user && <ChatbotButton />}
     </div>
   );
 };

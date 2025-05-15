@@ -17,7 +17,6 @@ import '@/styles/globals.css';
 import MedicalHistory from './pages/MedicalHistory';
 import LabReportAnalysis from './pages/LabReportAnalysis';
 import AiDiagnosis from './pages/AiDiagnosis';
-import MentalHealthChatbot from './pages/MentalHealthChatbot';
 import Dashboard from './pages/dashboard/Dashboard';
 import { AuthProvider } from './lib/auth-context';
 import { LanguageProvider, useLanguage } from './lib/language-context';
@@ -143,7 +142,6 @@ const App: React.FC = () => {
             <Route path="/medical-history" element={<ProtectedRoute><Layout><MedicalHistory /></Layout></ProtectedRoute>} />
             <Route path="/lab-report-analysis" element={<ProtectedRoute><Layout><LabReportAnalysis /></Layout></ProtectedRoute>} />
             <Route path="/ai-diagnosis" element={<ProtectedRoute><Layout><AiDiagnosis /></Layout></ProtectedRoute>} />
-            <Route path="/mental-health-chatbot" element={<ProtectedRoute><Layout><MentalHealthChatbot /></Layout></ProtectedRoute>} />
           </Routes>
         </Router>
       </AuthProvider>
