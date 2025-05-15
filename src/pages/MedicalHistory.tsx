@@ -20,7 +20,8 @@ import {
   X,
   ExternalLink,
   ChevronUp,
-  Eye
+  Eye,
+  Save
 } from 'lucide-react';
 
 interface MedicalEvent {
@@ -250,6 +251,14 @@ const MedicalHistory: React.FC = () => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState<boolean>(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [newEvent, setNewEvent] = useState<Partial<MedicalEvent>>({
+    type: 'consultation',
+    date: new Date().toISOString().slice(0, 16),
+    title: '',
+    provider: '',
+    description: ''
+  });
 
   // Apply filters and search
   const filteredEvents = events.filter(event => {
@@ -326,40 +335,86 @@ const MedicalHistory: React.FC = () => {
     eventsByMonth[monthYear].push(event);
   });
 
-  return (
-    <div className="w-full max-w-7xl mx-auto px-4 pb-12">
-      <div className="mb-8 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
-          <Calendar className="mr-3 h-7 w-7 text-blue-400" /> 
-          Medical History
-        </h1>
-        
-        {/* Add Record Button */}
-        <button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center text-white transition-all duration-200">
-          <Plus size={20} className="mr-2" />
-          Add Record
-        </button>
-      </div>
-      <p className="text-gray-400 max-w-3xl mb-8">
-        Access complete medical timeline with consultations, reports, medications, and more in one central place.
-      </p>
+  // Handle adding new event
+  const handleAddEvent = () => {
+    setShowAddModal(true);
+  };
 
-      {/* Search and Filter Bar */}
-      <div className="flex flex-wrap gap-3 mb-8 bg-gray-900/80 p-4 rounded-xl backdrop-blur shadow-lg">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-          <input 
-            type="text" 
-            placeholder="Search your medical records..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-          />
+  // Handle input change for new event
+  const handleNewEventChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewEvent(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle form submission for new event
+  const handleSubmitNewEvent = () => {
+    // Generate a unique ID
+    const newId = `event-${Date.now()}`;
+    
+    // Create the new event object
+    const eventToAdd: MedicalEvent = {
+      id: newId,
+      date: newEvent.date || new Date().toISOString(),
+      title: newEvent.title || 'Untitled Event',
+      type: (newEvent.type as MedicalEvent['type']) || 'consultation',
+      provider: newEvent.provider || 'Unknown Provider',
+      description: newEvent.description || '',
+    };
+    
+    // Add the new event to the events array
+    setEvents(prev => [eventToAdd, ...prev]);
+    
+    // Reset the form and close the modal
+    setNewEvent({
+      type: 'consultation',
+      date: new Date().toISOString().slice(0, 16),
+      title: '',
+      provider: '',
+      description: ''
+    });
+    setShowAddModal(false);
+  };
+
+  // Handle modal close
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+  };
+
+  return (
+    <div className="w-full mx-auto px-4 pb-12 bg-gray-950">
+      <div className="max-w-7xl mx-auto">
+        <div className="py-6 flex justify-between items-center border-b border-gray-800">
+          <h1 className="text-2xl font-bold text-white flex items-center">
+            <Calendar className="mr-3 h-6 w-6 text-blue-400" /> 
+            Medical History
+          </h1>
+          
+          {/* Header Actions */}
+          <div className="flex gap-3 items-center">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input 
+                type="text" 
+                placeholder="Search records..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-64 pl-10 pr-4 py-2 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-200 text-sm"
+              />
+            </div>
+            
+            <button 
+              onClick={handleAddEvent}
+              className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg flex items-center justify-center text-white transition-all duration-200 text-sm font-medium"
+            >
+              <Plus size={18} className="mr-2" />
+              Add Record
+            </button>
+          </div>
         </div>
 
-        {/* Filter Tags */}
-        <div className="flex gap-2 flex-wrap items-center">
-          <span className="text-gray-400 hidden md:inline">Filter by:</span>
+        {/* Filter Bar */}
+        <div className="py-4 flex flex-wrap gap-2 mb-6">
+          <span className="text-gray-400 text-sm py-2">Filter by:</span>
           {Object.entries(eventTypeConfig).map(([type, config]) => (
             <button
               key={type}
@@ -367,7 +422,7 @@ const MedicalHistory: React.FC = () => {
               className={`px-3 py-2 rounded-lg flex items-center text-sm border transition-all ${
                 activeFilters.includes(type)
                   ? `${config.color} ${config.bgColor} border-current`
-                  : 'text-gray-400 border-gray-700 hover:border-gray-500'
+                  : 'text-gray-400 border-gray-800 hover:border-gray-700'
               }`}
             >
               <span className="mr-2">{config.icon}</span>
@@ -378,54 +433,51 @@ const MedicalHistory: React.FC = () => {
           {activeFilters.length > 0 && (
             <button
               onClick={clearFilters}
-              className="px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800"
+              className="px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 ml-auto"
             >
-              <X size={16} />
+              Clear filters
             </button>
           )}
         </div>
-      </div>
 
-      {/* Timeline with Details Sidebar */}
-      <div className={`grid grid-cols-1 ${isDetailsOpen ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} gap-8 relative`}>
-        {/* Medical Events Timeline */}
-        <div className={`${isDetailsOpen ? 'lg:col-span-2' : 'lg:col-span-1'} bg-gray-900 rounded-xl overflow-hidden shadow-xl border border-gray-800`}>
+        {/* Timeline Container */}
+        <div className="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-800 flex items-center">
+            <CalendarIcon className="text-blue-400 mr-2" size={18} />
+            <h2 className="text-lg font-medium text-white">Medical Timeline</h2>
+          </div>
+          
           <div className="p-6">
-            <h2 className="text-xl font-semibold mb-6 flex items-center">
-              <CalendarIcon className="mr-3 text-blue-400" size={22} />
-              Medical Timeline
-            </h2>
-            
             {Object.keys(eventsByMonth).length > 0 ? (
-              <div className="space-y-10">
+              <div className="space-y-8">
                 {Object.entries(eventsByMonth).map(([monthYear, monthEvents]) => (
                   <div key={monthYear} className="relative">
-                    <div className="flex items-center mb-5">
-                      <div className="bg-blue-600/20 p-2 rounded-lg mr-3">
-                        <CalendarIcon className="text-blue-400" size={18} />
+                    <div className="flex items-center mb-4">
+                      <div className="bg-blue-600/20 p-2 rounded-md mr-3">
+                        <CalendarIcon className="text-blue-400" size={16} />
                       </div>
-                      <h3 className="text-lg font-medium text-blue-50">{monthYear}</h3>
+                      <h3 className="text-md font-medium text-blue-50">{monthYear}</h3>
                     </div>
                     
-                    <div className="space-y-4 ml-2 pl-8 border-l-2 border-gray-700">
+                    <div className="space-y-3 ml-2 pl-8 border-l border-gray-800">
                       {monthEvents.map((event) => (
                         <div 
                           key={event.id} 
-                          className={`relative pl-6 pb-2 cursor-pointer transition-all duration-200 ${
+                          className={`relative pl-6 cursor-pointer group ${
                             selectedEvent?.id === event.id 
-                              ? 'bg-gray-800 -ml-6 pl-12 pr-6 py-4 rounded-lg border-l-4 border-blue-500 shadow-md' 
-                              : 'hover:bg-gray-800/40 hover:-ml-4 hover:pl-10 hover:rounded-lg'
+                              ? 'bg-gray-800 -ml-6 pl-12 pr-6 py-3 rounded-md' 
+                              : 'hover:bg-gray-800/30 py-3 pr-6 -ml-0 hover:ml-0 rounded-md'
                           }`}
                           onClick={() => handleEventClick(event)}
                         >
-                          <div className={`absolute left-[-16px] w-8 h-8 rounded-full flex items-center justify-center ${eventTypeConfig[event.type].bgColor} ${eventTypeConfig[event.type].color} border border-current z-10`}>
+                          <div className={`absolute left-[-14px] w-6 h-6 rounded-full flex items-center justify-center ${eventTypeConfig[event.type].bgColor} border border-gray-800 z-10`}>
                             {eventTypeConfig[event.type].icon}
                           </div>
                           
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <div className="flex items-center justify-between gap-4">
                             <div>
-                              <h4 className="font-medium text-white text-lg">{event.title}</h4>
-                              <div className="flex flex-wrap items-center text-sm text-gray-400 mt-1 gap-3">
+                              <h4 className="font-medium text-white">{event.title}</h4>
+                              <div className="flex flex-wrap items-center text-sm text-gray-400 mt-1 gap-x-4">
                                 <div className={`flex items-center ${eventTypeConfig[event.type].color}`}>
                                   {eventTypeConfig[event.type].icon}
                                   <span className="ml-1">{eventTypeConfig[event.type].label}</span>
@@ -443,12 +495,12 @@ const MedicalHistory: React.FC = () => {
                             
                             <div className="flex items-center gap-2">
                               {event.attachments && (
-                                <span className="text-xs bg-gray-700 px-2 py-1 rounded flex items-center">
+                                <span className="text-xs bg-gray-800 px-2 py-1 rounded flex items-center">
                                   <FileText size={12} className="mr-1" />
                                   {event.attachments.length}
                                 </span>
                               )}
-                              <button className="text-blue-400 hover:text-blue-300 flex items-center text-sm">
+                              <button className="text-blue-400 hover:text-blue-300 flex items-center text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Eye size={16} className="mr-1" />
                                 View
                               </button>
@@ -461,8 +513,8 @@ const MedicalHistory: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 bg-gray-800/50 rounded-xl border border-gray-700">
-                <FileText size={48} className="mx-auto mb-4 text-gray-600" />
+              <div className="text-center py-16 bg-gray-800/20 rounded-lg border border-gray-800">
+                <FileText size={48} className="mx-auto mb-4 text-gray-700" />
                 <p className="text-gray-400 mb-2">No medical events found with the current filters</p>
                 <button 
                   className="text-blue-400 hover:text-blue-300 mt-2"
@@ -474,120 +526,254 @@ const MedicalHistory: React.FC = () => {
             )}
           </div>
         </div>
-        
-        {/* Event Details Sidebar */}
-        <div 
-          className={`bg-gray-900 rounded-xl overflow-hidden shadow-xl border border-gray-800 h-fit lg:sticky lg:top-4 transition-all duration-300 transform ${
-            isDetailsOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 lg:absolute lg:right-0'
-          }`}
-        >
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Event Details</h2>
-              <button 
-                onClick={closeDetails}
-                className="p-2 hover:bg-gray-800 rounded-full"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            
-            {selectedEvent && (
-              <div className="space-y-6">
-                <div className={`px-4 py-3 rounded-lg ${eventTypeConfig[selectedEvent.type].bgColor} border ${eventTypeConfig[selectedEvent.type].color}`}>
-                  <div className="flex items-center">
-                    <div className="mr-3">
+
+        {/* Event Detail Modal */}
+        {selectedEvent && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold flex items-center">
+                    <div className={`mr-3 p-2 rounded-md ${eventTypeConfig[selectedEvent.type].bgColor}`}>
                       {eventTypeConfig[selectedEvent.type].icon}
                     </div>
-                    <div>
-                      <div className={`text-sm ${eventTypeConfig[selectedEvent.type].color}`}>
-                        {eventTypeConfig[selectedEvent.type].label}
-                      </div>
-                      <h3 className="text-lg font-medium text-white">{selectedEvent.title}</h3>
-                    </div>
-                  </div>
+                    Event Details
+                  </h2>
+                  <button 
+                    onClick={() => setSelectedEvent(null)}
+                    className="p-2 hover:bg-gray-800 rounded-full"
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
                 
-                <div className="bg-gray-800/50 rounded-lg p-4 space-y-3">
-                  <div className="flex items-center text-gray-300">
-                    <Calendar className="mr-2 text-gray-400" size={16} />
-                    <span>{formatDate(selectedEvent.date)} at {formatTime(selectedEvent.date)}</span>
+                <div className="space-y-6">
+                  <div className={`px-4 py-3 rounded-lg ${eventTypeConfig[selectedEvent.type].bgColor} border ${eventTypeConfig[selectedEvent.type].color}`}>
+                    <div className="flex items-center">
+                      <div className="mr-3">
+                        {eventTypeConfig[selectedEvent.type].icon}
+                      </div>
+                      <div>
+                        <div className={`text-sm ${eventTypeConfig[selectedEvent.type].color}`}>
+                          {eventTypeConfig[selectedEvent.type].label}
+                        </div>
+                        <h3 className="text-lg font-medium text-white">{selectedEvent.title}</h3>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center text-gray-300">
-                    <User className="mr-2 text-gray-400" size={16} />
-                    <span>{selectedEvent.provider}</span>
+                  <div className="bg-gray-800/50 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center text-gray-300">
+                      <Calendar className="mr-2 text-gray-400" size={16} />
+                      <span>{formatDate(selectedEvent.date)} at {formatTime(selectedEvent.date)}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-gray-300">
+                      <User className="mr-2 text-gray-400" size={16} />
+                      <span>{selectedEvent.provider}</span>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <h4 className="font-medium text-gray-300">Description</h4>
-                  <p className="text-gray-400 bg-gray-800/50 p-4 rounded-lg">{selectedEvent.description}</p>
-                </div>
-                
-                {selectedEvent.metrics && Object.keys(selectedEvent.metrics).length > 0 && (
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-gray-300">Health Metrics</h4>
-                    <div className="grid gap-3">
-                      {Object.entries(selectedEvent.metrics).map(([name, data]) => (
-                        <div key={name} className="bg-gray-800/70 p-4 rounded-lg">
-                          <div className="flex justify-between mb-1">
-                            <span className="text-gray-300">{name}</span>
+                  
+                  <div className="space-y-1">
+                    <h4 className="font-medium text-gray-300">Description</h4>
+                    <p className="text-gray-400 bg-gray-800/50 p-4 rounded-lg">{selectedEvent.description}</p>
+                  </div>
+                  
+                  {selectedEvent.metrics && Object.keys(selectedEvent.metrics).length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-gray-300">Health Metrics</h4>
+                      <div className="grid gap-3">
+                        {Object.entries(selectedEvent.metrics).map(([name, data]) => (
+                          <div key={name} className="bg-gray-800/70 p-4 rounded-lg">
+                            <div className="flex justify-between mb-1">
+                              <span className="text-gray-300">{name}</span>
+                              <div className="flex items-center">
+                                <span className="font-medium text-white">{data.value} {data.unit}</span>
+                                {data.trend && (
+                                  <span className="ml-2">
+                                    {getTrendIcon(data.trend)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            {data.previousValue && (
+                              <div className="text-sm text-gray-500">
+                                Previous: {data.previousValue} {data.unit}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedEvent.attachments && selectedEvent.attachments.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-gray-300">Attachments</h4>
+                      <div className="grid gap-2">
+                        {selectedEvent.attachments.map(attachment => (
+                          <div key={attachment.id} className="flex items-center justify-between bg-gray-800/70 p-3 rounded-lg hover:bg-gray-800 transition-colors">
                             <div className="flex items-center">
-                              <span className="font-medium text-white">{data.value} {data.unit}</span>
-                              {data.trend && (
-                                <span className="ml-2">
-                                  {getTrendIcon(data.trend)}
-                                </span>
-                              )}
+                              <div className="bg-blue-600/20 p-2 rounded mr-3">
+                                <FileText className="text-blue-400" size={16} />
+                              </div>
+                              <div>
+                                <div className="text-gray-200">{attachment.name}</div>
+                                <div className="text-xs text-gray-500">{attachment.type} · {attachment.size}</div>
+                              </div>
+                            </div>
+                            <div className="flex">
+                              <button className="p-2 hover:bg-gray-700 rounded-full" title="Download">
+                                <Download size={16} />
+                              </button>
+                              <button className="p-2 hover:bg-gray-700 rounded-full" title="Share">
+                                <Share2 size={16} />
+                              </button>
+                              <button className="p-2 hover:bg-gray-700 rounded-full" title="Open">
+                                <ExternalLink size={16} />
+                              </button>
                             </div>
                           </div>
-                          {data.previousValue && (
-                            <div className="text-sm text-gray-500">
-                              Previous: {data.previousValue} {data.unit}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                {selectedEvent.attachments && selectedEvent.attachments.length > 0 && (
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-gray-300">Attachments</h4>
-                    <div className="grid gap-2">
-                      {selectedEvent.attachments.map(attachment => (
-                        <div key={attachment.id} className="flex items-center justify-between bg-gray-800/70 p-3 rounded-lg hover:bg-gray-800 transition-colors">
-                          <div className="flex items-center">
-                            <div className="bg-blue-600/20 p-2 rounded mr-3">
-                              <FileText className="text-blue-400" size={16} />
-                            </div>
-                            <div>
-                              <div className="text-gray-200">{attachment.name}</div>
-                              <div className="text-xs text-gray-500">{attachment.type} · {attachment.size}</div>
-                            </div>
-                          </div>
-                          <div className="flex">
-                            <button className="p-2 hover:bg-gray-700 rounded-full" title="Download">
-                              <Download size={16} />
-                            </button>
-                            <button className="p-2 hover:bg-gray-700 rounded-full" title="Share">
-                              <Share2 size={16} />
-                            </button>
-                            <button className="p-2 hover:bg-gray-700 rounded-full" title="Open">
-                              <ExternalLink size={16} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Add Record Modal */}
+        {showAddModal && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold flex items-center">
+                    <Plus className="mr-3 text-blue-400" size={22} />
+                    Add New Medical Record
+                  </h2>
+                  <button 
+                    onClick={handleCloseModal}
+                    className="p-2 hover:bg-gray-800 rounded-full"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-3">Record Type</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {Object.entries(eventTypeConfig).map(([type, config]) => (
+                        <div 
+                          key={type}
+                          onClick={() => setNewEvent({ ...newEvent, type: type as MedicalEvent['type'] })}
+                          className={`flex items-center p-3 rounded-lg cursor-pointer border transition-colors ${
+                            newEvent.type === type 
+                              ? `${config.color} ${config.bgColor} border-current` 
+                              : 'border-gray-700 hover:border-gray-600'
+                          }`}
+                        >
+                          <div className="mr-2">{config.icon}</div>
+                          <span>{config.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="title" className="block text-sm font-medium mb-2">Title *</label>
+                      <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        placeholder="E.g., Annual Check-up"
+                        value={newEvent.title}
+                        onChange={handleNewEventChange}
+                        className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-white"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="provider" className="block text-sm font-medium mb-2">Healthcare Provider *</label>
+                      <input
+                        type="text"
+                        id="provider"
+                        name="provider"
+                        placeholder="E.g., Dr. Sarah Johnson"
+                        value={newEvent.provider}
+                        onChange={handleNewEventChange}
+                        className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="date" className="block text-sm font-medium mb-2">Date and Time *</label>
+                    <input
+                      type="datetime-local"
+                      id="date"
+                      name="date"
+                      value={newEvent.date}
+                      onChange={handleNewEventChange}
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-white"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="description" className="block text-sm font-medium mb-2">Description</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      placeholder="Enter details about this medical record..."
+                      value={newEvent.description}
+                      onChange={handleNewEventChange}
+                      rows={4}
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-white resize-none"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Attachments</label>
+                    <div className="border-2 border-dashed border-gray-700 rounded-lg p-4 text-center">
+                      <FileText size={28} className="mx-auto mb-2 text-gray-500" />
+                      <p className="text-gray-400 mb-2">Drag and drop files here, or click to browse</p>
+                      <button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm">
+                        Browse Files
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">Supported formats: PDF, JPG, PNG (Max 10MB)</p>
+                  </div>
+                  
+                  <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-800">
+                    <button 
+                      onClick={handleCloseModal} 
+                      className="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800 text-white"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleSubmitNewEvent}
+                      className={`px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg flex items-center text-white ${
+                        !newEvent.title || !newEvent.provider ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      disabled={!newEvent.title || !newEvent.provider}
+                    >
+                      <Save size={18} className="mr-2" />
+                      Save Record
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
