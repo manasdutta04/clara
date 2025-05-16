@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Search, MapPin, Phone, Clock, Star, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
-import { useAuth } from '@/lib/auth-context';
-import { trackUserActivity, Feature, Action } from '@/lib/user-activity-service';
-
+import MapComponent from './Map';
 // Types
 interface HealthService {
   id: string;
@@ -108,14 +106,6 @@ const NearbyHealthServices: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedService, setExpandedService] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'distance' | 'rating'>('distance');
-  const { user, isAuthenticated } = useAuth();
-  
-  // Track when user visits the Nearby Health Services page
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      trackUserActivity(user.id, Feature.NEARBY_HEALTH_SERVICES, Action.VIEW);
-    }
-  }, [isAuthenticated, user]);
 
   // Filter services based on search and category
   const filteredServices = sampleHealthServices
@@ -215,6 +205,7 @@ const NearbyHealthServices: React.FC = () => {
             ))}
           </div>
         </div>
+        <MapComponent/>
 
         {/* Results Section */}
         <div className="space-y-4">

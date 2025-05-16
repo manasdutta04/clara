@@ -1,16 +1,14 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { cn } from "@/lib/utils";
-import { Button } from '@/components/ui/button';
-import { RippleButton } from "@/components/magicui/ripple-button";
+
 import { PulsatingButton } from "@/components/magicui/pulsating-button";
 import { ShinyButton } from "@/components/magicui/shiny-button";
-import { InteractiveGridPattern } from "@/components/magicui/interactive-grid-pattern";
+
 import { TextReveal } from "@/components/magicui/text-reveal";
 import { CoolMode } from "@/components/magicui/cool-mode";
 import { FeaturesSection } from "@/components/features-section";
 import { TestimonialsSection } from "@/components/testimonials-section";
-import Footer from "@/components/footer";
+
 import { ArrowRight } from 'lucide-react';
 import AuthPage from '@/pages/auth/AuthPage';
 import '@/styles/globals.css';
@@ -38,7 +36,7 @@ const HomePage: React.FC = () => {
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
       const sectionTop = textRevealRef.current.getBoundingClientRect().top + scrollY;
-      const sectionHeight = textRevealRef.current.offsetHeight;
+      
       
       // Calculate when the section should start and end being sticky
       const startSticky = sectionTop - windowHeight;

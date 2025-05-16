@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, User } from 'lucide-react';
+import React,{useState} from 'react';
+import { Link } from 'react-router-dom';
+import { User } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/language-context';
 import { InteractiveGridPattern } from '@/components/magicui/interactive-grid-pattern';
@@ -9,20 +9,21 @@ import { cn } from '@/lib/utils';
 import LanguageSelector from '@/components/language-selector';
 import { RippleButton } from "@/components/magicui/ripple-button";
 import ChatbotButton from '@/components/ChatbotButton';
+import ProfilePopup from '../pages/Profile';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const toggleProfile = () => {
+    setIsProfileOpen(!isProfileOpen);
   };
+
 
   return (
     <div className="min-h-screen w-screen overflow-x-hidden flex flex-col bg-black text-gray-100 transition-colors duration-300 relative font-sans">
@@ -49,23 +50,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* User Profile, Language Selector, and Logout OR Login/Signup buttons */}
           {user ? (
             <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <div className="h-8 w-8 rounded-full bg-gray-800 flex items-center justify-center mr-2">
-                  <User className="h-4 w-4 text-gray-300" />
-                </div>
-                <span className="text-sm font-medium text-gray-300">{user.name}</span>
-              </div>
-              
               {/* Language Selector */}
               <LanguageSelector />
-              
-              <button 
-                onClick={handleLogout}
-                className="flex items-center text-gray-400 hover:text-gray-200 transition-colors"
-              >
-                <LogOut className="h-4 w-4 mr-1" />
-                <span className="text-sm">{t('logout')}</span>
-              </button>
+              <div className="flex items-center">
+                <div className="h-8 w-8 rounded-full bg-gray-800 flex items-center justify-center mr-2">
+                  <button 
+                    onClick={toggleProfile}
+                    className="h-10 w-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+                    aria-label="Open profile menu"
+                  >
+                    {user?.name ? (
+                      <div className="h-full w-full rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                      {user.name.charAt(0).toUpperCase()}
+                      </div>
+                    ) : (
+                      <User className="h-5 w-5 text-white" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              {/* Profile Popup */}
+              <ProfilePopup isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
             </div>
           ) : (
             <div className="flex space-x-2 items-center">
@@ -105,4 +110,4 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   );
 };
 
-export default Layout; 
+export default Layout;
