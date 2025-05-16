@@ -33,7 +33,7 @@ const ProfilePopup: React.FC<ProfilePopupProps> = ({ isOpen, onClose }) => {
         {/* Header with user info */}
         <div className="bg-gray-800/50 p-4">
           <div className="flex items-center">
-            <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold mr-3">
+            <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold mr-3 overflow-hidden" style={{ aspectRatio: '1/1', borderRadius: '50%' }}>
               {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
             <div>
@@ -50,10 +50,10 @@ const ProfilePopup: React.FC<ProfilePopupProps> = ({ isOpen, onClose }) => {
             <span>{t('viewProfile') || 'View Profile'}</span>
           </button>
           
-          <button className="w-full flex items-center p-3 rounded-lg hover:bg-gray-800 text-gray-300 transition-colors">
+          {/* <button className="w-full flex items-center p-3 rounded-lg hover:bg-gray-800 text-gray-300 transition-colors">
             <Settings className="h-5 w-5 mr-3" />
             <span>{t('settings') || 'Settings'}</span>
-          </button>
+          </button> */}
           
           <div className="my-1 border-t border-gray-800"></div>
           

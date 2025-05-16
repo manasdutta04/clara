@@ -30,7 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Interactive Grid Pattern Background */}
       <InteractiveGridPattern
         className={cn(
-          "absolute inset-0 w-full h-full z-0",
+          "absolute inset-0 w-full h-full z-0 pointer-events-none",
           "[mask-image:radial-gradient(ellipse_at_center,white_60%,transparent_95%)]",
         )}
         count={100}
@@ -60,7 +60,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     aria-label="Open profile menu"
                   >
                     {user?.name ? (
-                      <div className="h-full w-full rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                      <div className="h-full w-full rounded-full bg-blue-600 flex items-center justify-center text-white font-bold overflow-hidden" style={{ aspectRatio: '1/1', borderRadius: '50%' }}>
                       {user.name.charAt(0).toUpperCase()}
                       </div>
                     ) : (
