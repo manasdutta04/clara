@@ -4,6 +4,12 @@
 
 ---
 
+## 📹 Demo
+
+Check out the [demo video on YouTube](https://youtu.be/i1PQAsDsBjY?si=P9gro8BAp1rwOMOw).
+
+---
+
 ## ✨ Features
 
 - **Mental Health Chatbot**: AI-powered chat interface to help with stress, anxiety, and depression with personalized advice and support.
